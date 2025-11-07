@@ -1,0 +1,270 @@
+/* Next Subscription Color Theme Tokens v2.0 - Professional Redesign */
+/* Refined color system for premium SaaS platform experience */
+
+:root {
+  /* Brand Colors - Refined Palette */
+  --brand-primary: #E43636;
+  --brand-primary-hover: #C92A2A;
+  --brand-primary-light: rgba(228, 54, 54, 0.1);
+  --brand-secondary: #F6EFD2;
+  --brand-accent: #E2DDB4;
+  --brand-neutral-dark: #000000;
+  --brand-pure-white: #FFFFFF;
+  
+  /* Dark Theme Base Colors - Deep & Luxurious */
+  --bg-dark: #000000;
+  --bg-darker: #0A0A0A;
+  --bg-dark-elevated: #141414;
+  --surface-dark: rgba(255, 255, 255, 0.03);
+  --surface-elevated-dark: rgba(255, 255, 255, 0.06);
+  --surface-card-dark: rgba(255, 255, 255, 0.02);
+  --surface-hover-dark: rgba(228, 54, 54, 0.08);
+  
+  /* Light Theme Base Colors - Clean & Professional */
+  --bg-light: #F6EFD2;
+  --bg-lighter: #FFFFFF;
+  --bg-light-elevated: #FAF8F3;
+  --surface-light: rgba(255, 255, 255, 0.85);
+  --surface-light-elevated: rgba(255, 255, 255, 0.95);
+  --surface-light-card: #FFFFFF;
+  --surface-hover-light: rgba(228, 54, 54, 0.05);
+  
+  /* Text Colors - Dark Theme (High Contrast) */
+  --text-on-dark: #F6EFD2;
+  --text-on-dark-muted: rgba(246, 239, 210, 0.85);
+  --text-on-dark-subtle: rgba(246, 239, 210, 0.70);
+  --text-on-dark-disabled: rgba(246, 239, 210, 0.50);
+  
+  /* Text Colors - Light Theme (High Contrast) */
+  --text-on-light: #1A1A1A;
+  --text-on-light-muted: #4A4A4A;
+  --text-on-light-subtle: #6B6B6B;
+  --text-on-light-disabled: #9A9A9A;
+  
+  /* Border Colors - Dark Theme (Subtle Red Accents) */
+  --border-dark: rgba(228, 54, 54, 0.15);
+  --border-dark-subtle: rgba(228, 54, 54, 0.08);
+  --border-dark-focus: rgba(228, 54, 54, 0.4);
+  
+  /* Border Colors - Light Theme (Elegant Beige) */
+  --border-light: rgba(226, 221, 180, 0.4);
+  --border-light-subtle: rgba(226, 221, 180, 0.25);
+  --border-light-focus: rgba(228, 54, 54, 0.5);
+  
+  /* Brand Gradients - Refined & Elegant */
+  --gradient-primary: linear-gradient(135deg, #E43636 0%, #C92A2A 100%);
+  --gradient-hero: linear-gradient(135deg, #E43636 0%, #F6EFD2 40%, #E2DDB4 100%);
+  --gradient-card: linear-gradient(135deg, rgba(228, 54, 54, 0.1) 0%, rgba(246, 239, 210, 0.05) 100%);
+  --gradient-cta: linear-gradient(135deg, #E43636 0%, #C92A2A 100%);
+  --gradient-accent: linear-gradient(135deg, #E2DDB4 0%, #F6EFD2 100%);
+  --gradient-overlay: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 100%);
+  
+  /* Glassmorphism Effects - Dark Theme (Refined) */
+  --glass-bg-dark: rgba(20, 20, 20, 0.6);
+  --glass-border-dark: rgba(228, 54, 54, 0.12);
+  --glass-backdrop: blur(16px);
+  --glass-shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --glass-hover-bg-dark: rgba(30, 30, 30, 0.7);
+  
+  /* Glassmorphism Effects - Light Theme (Elegant) */
+  --glass-bg-light: rgba(255, 255, 255, 0.7);
+  --glass-border-light: rgba(228, 54, 54, 0.15);
+  --glass-shadow-light: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --glass-hover-bg-light: rgba(255, 255, 255, 0.85);
+  
+  /* Shadows - Dark Theme (Deep & Layered) */
+  --shadow-dark-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-dark-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-dark-lg: 0 16px 48px rgba(0, 0, 0, 0.6);
+  --shadow-dark-xl: 0 24px 64px rgba(0, 0, 0, 0.7);
+  --shadow-brand-dark: 0 8px 24px rgba(228, 54, 54, 0.3);
+  
+  /* Shadows - Light Theme (Subtle & Clean) */
+  --shadow-light-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-light-md: 0 8px 24px rgba(0, 0, 0, 0.1);
+  --shadow-light-lg: 0 16px 48px rgba(0, 0, 0, 0.15);
+  --shadow-light-xl: 0 24px 64px rgba(0, 0, 0, 0.2);
+  --shadow-brand-light: 0 8px 24px rgba(228, 54, 54, 0.2);
+  
+  /* Status Colors - Professional */
+  --success: #10B981;
+  --success-light: rgba(16, 185, 129, 0.1);
+  --warning: #F59E0B;
+  --warning-light: rgba(245, 158, 11, 0.1);
+  --error: #EF4444;
+  --error-light: rgba(239, 68, 68, 0.1);
+  --info: var(--brand-primary);
+  --info-light: var(--brand-primary-light);
+  
+  /* Status Color Utilities */
+  --text-success: var(--success);
+  --text-warning: var(--warning);
+  --text-error: var(--error);
+  --bg-success: var(--success-light);
+  --bg-warning: var(--warning-light);
+  --bg-error: var(--error-light);
+  
+  /* Overlay */
+  --overlay-dark: rgba(0, 0, 0, 0.75);
+  --overlay-light: rgba(0, 0, 0, 0.5);
+}
+
+/* Dark Theme Classes */
+.theme-dark {
+  --bg-base: var(--bg-dark);
+  --bg-elevated: var(--bg-darker);
+  --bg-surface: var(--bg-dark-elevated);
+  --surface-base: var(--surface-dark);
+  --surface-elevated: var(--surface-elevated-dark);
+  --surface-card: var(--surface-card-dark);
+  --surface-hover: var(--surface-hover-dark);
+  --text-primary: var(--text-on-dark);
+  --text-secondary: var(--text-on-dark-muted);
+  --text-subtle: var(--text-on-dark-subtle);
+  --text-disabled: var(--text-on-dark-disabled);
+  --border-base: var(--border-dark);
+  --border-subtle: var(--border-dark-subtle);
+  --border-focus: var(--border-dark-focus);
+  --shadow-sm: var(--shadow-dark-sm);
+  --shadow-md: var(--shadow-dark-md);
+  --shadow-lg: var(--shadow-dark-lg);
+  --shadow-xl: var(--shadow-dark-xl);
+  --shadow-brand: var(--shadow-brand-dark);
+  --glass-bg: var(--glass-bg-dark);
+  --glass-border: var(--glass-border-dark);
+  --glass-shadow: var(--glass-shadow-dark);
+  --glass-hover-bg: var(--glass-hover-bg-dark);
+  --overlay: var(--overlay-dark);
+}
+
+/* Light Theme Classes */
+.theme-light {
+  --bg-base: var(--bg-light);
+  --bg-elevated: var(--bg-lighter);
+  --bg-surface: var(--bg-light-elevated);
+  --surface-base: var(--surface-light);
+  --surface-elevated: var(--surface-light-elevated);
+  --surface-card: var(--surface-light-card);
+  --surface-hover: var(--surface-hover-light);
+  --text-primary: var(--text-on-light);
+  --text-secondary: var(--text-on-light-muted);
+  --text-subtle: var(--text-on-light-subtle);
+  --text-disabled: var(--text-on-light-disabled);
+  --border-base: var(--border-light);
+  --border-subtle: var(--border-light-subtle);
+  --border-focus: var(--border-light-focus);
+  --shadow-sm: var(--shadow-light-sm);
+  --shadow-md: var(--shadow-light-md);
+  --shadow-lg: var(--shadow-light-lg);
+  --shadow-xl: var(--shadow-light-xl);
+  --shadow-brand: var(--shadow-brand-light);
+  --glass-bg: var(--glass-bg-light);
+  --glass-border: var(--glass-border-light);
+  --glass-shadow: var(--glass-shadow-light);
+  --glass-hover-bg: var(--glass-hover-bg-light);
+  --overlay: var(--overlay-light);
+}
+
+/* Utility Classes for Theme Consistency */
+.bg-theme-base { background-color: var(--bg-base); }
+.bg-theme-elevated { background-color: var(--bg-elevated); }
+.bg-theme-surface { background-color: var(--bg-surface); }
+.bg-theme-surface-elevated { background-color: var(--surface-elevated); }
+.bg-theme-surface-card { background-color: var(--surface-card); }
+
+.text-theme-primary { color: var(--text-primary); }
+.text-theme-secondary { color: var(--text-secondary); }
+.text-theme-subtle { color: var(--text-subtle); }
+.text-theme-muted { color: var(--text-secondary); }
+.text-theme-disabled { color: var(--text-disabled); }
+
+.border-theme-base { border-color: var(--border-base); }
+.border-theme-subtle { border-color: var(--border-subtle); }
+.border-theme-focus { border-color: var(--border-focus); }
+
+.shadow-theme-sm { box-shadow: var(--shadow-sm); }
+.shadow-theme-md { box-shadow: var(--shadow-md); }
+.shadow-theme-lg { box-shadow: var(--shadow-lg); }
+.shadow-theme-xl { box-shadow: var(--shadow-xl); }
+.shadow-theme-brand { box-shadow: var(--shadow-brand); }
+
+/* Brand Gradient Utilities */
+.bg-gradient-primary { background: var(--gradient-primary); }
+.bg-gradient-hero { background: var(--gradient-hero); }
+.bg-gradient-card { background: var(--gradient-card); }
+.bg-gradient-cta { background: var(--gradient-cta); }
+.bg-gradient-accent { background: var(--gradient-accent); }
+.bg-gradient-overlay { background: var(--gradient-overlay); }
+
+/* Glassmorphism Utilities - Refined */
+.glass-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-backdrop);
+  -webkit-backdrop-filter: var(--glass-backdrop);
+  box-shadow: var(--glass-shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: var(--glass-hover-bg);
+  border-color: var(--border-focus);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.glass-bg { background: var(--glass-bg); }
+.glass-border { border-color: var(--glass-border); }
+.glass-shadow { box-shadow: var(--glass-shadow); }
+.glass-hover-bg { background: var(--glass-hover-bg); }
+.glass-border-selected { border: 2px solid var(--brand-primary); }
+
+/* Backdrop Blur Utilities */
+.backdrop-theme {
+  backdrop-filter: var(--glass-backdrop);
+  -webkit-backdrop-filter: var(--glass-backdrop);
+}
+
+.backdrop-theme-light {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Focus Ring Utilities - Professional */
+.focus-theme {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--border-focus);
+  transition: box-shadow 0.2s ease;
+}
+
+.focus-theme-inset {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--border-focus);
+}
+
+/* Button Hover States - Refined */
+.btn-primary-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary-hover:hover {
+  background: var(--brand-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-brand);
+}
+
+/* Smooth Transitions */
+.transition-theme {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Status Color Utility Classes */
+.text-success { color: var(--text-success); }
+.text-warning { color: var(--text-warning); }
+.text-error { color: var(--text-error); }
+.bg-success { background-color: var(--bg-success); }
+.bg-warning { background-color: var(--bg-warning); }
+.bg-error { background-color: var(--bg-error); }
+.border-success { border-color: var(--success); }
+.border-warning { border-color: var(--warning); }
+.border-error { border-color: var(--error); }
