@@ -31,6 +31,7 @@ const vendorAuditSchema = new mongoose.Schema({
       'credentials_sent',
       'password_reset',
       'password_generated',
+      'password_viewed',
       'suspended',
       'activated',
       'rejected',

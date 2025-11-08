@@ -50,6 +50,7 @@ const VendorLayout = ({ children, currentPage }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: '🏠', path: '/vendor/dashboard' },
     { id: 'products', label: 'Products', icon: '📦', path: '/vendor/products' },
+    { id: 'requests', label: 'Admin Requests', icon: '📥', path: '/vendor/requests' },
     { id: 'orders', label: 'Orders', icon: '📋', path: '/vendor/orders' },
     { id: 'team', label: 'Loaders & Team', icon: '👥', path: '/vendor/team' },
     { id: 'policies', label: 'Policies', icon: '📜', path: '/vendor/policies' },

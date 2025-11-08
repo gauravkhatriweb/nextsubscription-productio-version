@@ -41,6 +41,9 @@ export const getCurrentSettings = async (req, res) => {
         heroTagline: settings.heroTagline,
         primaryHeading: settings.primaryHeading,
         theme: settings.theme,
+        themeLight: settings.themeLight,
+        themeDark: settings.themeDark,
+        activeThemeMode: settings.activeThemeMode,
         settingsVersion: settings.settingsVersion
       }
     });
@@ -63,6 +66,7 @@ export const getCurrentSettings = async (req, res) => {
 export const updateBrandingSettings = async (req, res) => {
   try {
     const adminEmail = req.admin?.email || null; // Get admin email from auth
+    const parseBoolean = (value) => value === true || value === 'true' || value === '1'; // FIX: Normalize boolean flags coming from multipart form-data
     
     // Get siteName from body (could be in JSON or form-data)
     const siteName = req.body?.siteName;
@@ -81,6 +85,24 @@ export const updateBrandingSettings = async (req, res) => {
       brandingData.siteName = trimmedName;
     }
     
+    // Handle delete flags
+    if (parseBoolean(req.body?.deleteLogo) || parseBoolean(req.body?.removeLogo)) {
+      const settings = await getSettings();
+      if (settings.logoUrl) {
+        const oldLogoFilename = path.basename(settings.logoUrl);
+        deleteOldLogo(oldLogoFilename);
+      }
+      brandingData.logoUrl = null;
+    }
+    if (parseBoolean(req.body?.deleteFavicon) || parseBoolean(req.body?.removeFavicon)) {
+      const settings = await getSettings();
+      if (settings.faviconUrl) {
+        const oldFaviconFilename = path.basename(settings.faviconUrl);
+        deleteOldFavicon(oldFaviconFilename);
+      }
+      brandingData.faviconUrl = null;
+    }
+
     // Handle logo upload - check req.uploadedFiles first (from middleware)
     if (req.uploadedFiles?.logo) {
       const logoFile = req.uploadedFiles.logo;
@@ -130,9 +152,10 @@ export const updateBrandingSettings = async (req, res) => {
     }
     
     if (Object.keys(brandingData).length === 0) {
+      // FIX: Provide clearer error when nothing was supplied in the request
       return res.status(400).json({
         success: false,
-        message: 'No branding data provided'
+        message: 'No branding files provided. Please attach a logo and/or favicon using multipart/form-data.'
       });
     }
     
@@ -237,79 +260,43 @@ export const updateContentSettings = async (req, res) => {
 export const updateThemeSettings = async (req, res) => {
   try {
     const adminEmail = req.admin?.email || null;
-    const { primary, background, surface, text } = req.body;
-    
-    const themeData = {};
-    
-    // Validate color format (hex)
-    const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-    
-    if (primary !== undefined) {
-      if (!hexColorRegex.test(primary)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Primary color must be a valid hex color (e.g., #E43636)'
-        });
+
+    const parsePalette = (value) => {
+      if (!value) return undefined;
+      if (typeof value === 'string') {
+        try {
+          return JSON.parse(value);
+        } catch {
+          return undefined;
+        }
       }
-      themeData.primary = primary;
-    }
-    
-    if (background !== undefined) {
-      if (!hexColorRegex.test(background)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Background color must be a valid hex color'
-        });
+      if (typeof value === 'object') {
+        return value;
       }
-      themeData.background = background;
-    }
-    
-    if (surface !== undefined) {
-      if (!hexColorRegex.test(surface)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Surface color must be a valid hex color'
-        });
-      }
-      themeData.surface = surface;
-    }
-    
-    if (text !== undefined) {
-      if (!hexColorRegex.test(text)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Text color must be a valid hex color'
-        });
-      }
-      themeData.text = text;
-    }
-    
-    // Validate contrast if both background and text are provided
-    if (themeData.background && themeData.text) {
-      const hasGoodContrast = validateColorContrast(themeData.background, themeData.text);
-      if (!hasGoodContrast) {
-        return res.status(400).json({
-          success: false,
-          message: 'Color contrast is too low. Please choose colors with better contrast for accessibility.',
-          warning: 'WCAG AA requires at least 4.5:1 contrast ratio'
-        });
-      }
-    }
-    
-    if (Object.keys(themeData).length === 0) {
+      return undefined;
+    };
+
+    const lightTheme = parsePalette(req.body?.lightTheme);
+    const darkTheme = parsePalette(req.body?.darkTheme);
+    const activeThemeMode = typeof req.body?.activeThemeMode === 'string' ? req.body.activeThemeMode.trim().toLowerCase() : undefined;
+
+    if (!lightTheme && !darkTheme && !activeThemeMode) {
       return res.status(400).json({
         success: false,
-        message: 'No theme data provided'
+        message: 'Theme payload missing. Provide lightTheme and/or darkTheme objects with color values.'
       });
     }
-    
-    const updatedSettings = await updateTheme(themeData, adminEmail);
+
+    const updatedSettings = await updateTheme({ lightTheme, darkTheme, activeThemeMode }, adminEmail);
     
     return res.status(200).json({
       success: true,
       message: 'Theme settings updated successfully',
       settings: {
-        theme: updatedSettings.theme
+        theme: updatedSettings.theme,
+        themeLight: updatedSettings.themeLight,
+        themeDark: updatedSettings.themeDark,
+        activeThemeMode: updatedSettings.activeThemeMode
       }
     });
   } catch (error) {
@@ -338,7 +325,10 @@ export const resetTheme = async (req, res) => {
       success: true,
       message: 'Theme reset to brand defaults',
       settings: {
-        theme: updatedSettings.theme
+        theme: updatedSettings.theme,
+        themeLight: updatedSettings.themeLight,
+        themeDark: updatedSettings.themeDark,
+        activeThemeMode: updatedSettings.activeThemeMode
       }
     });
   } catch (error) {

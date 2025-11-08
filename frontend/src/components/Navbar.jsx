@@ -104,6 +104,7 @@ const Navbar = () => {
 
   const navItems = [
     { id: 'home', label: 'Home', path: '/' },
+    { id: 'original', label: 'Original Home', path: '/home' },
     { id: 'about', label: 'About', path: '/about' },
     { id: 'subscribers', label: 'Subscribers' },
     { id: 'providers', label: 'Providers' },

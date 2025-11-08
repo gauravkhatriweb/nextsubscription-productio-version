@@ -13,16 +13,190 @@ import VendorAuditModel from '../models/vendorAudit.model.js';
 import { sendEmail } from './email.service.js';
 import { generateVendorCredentialsEmail } from '../templates/vendorEmail.template.js';
 import { generateVendorRejectionEmail } from '../templates/vendorRejectionEmail.template.js';
-import {
-  generateWhatsAppUrl,
-  generateVendorCredentialsWhatsApp,
-  generateVendorRejectionWhatsApp
-} from './whatsapp.service.js';
+// WhatsApp service removed in favor of manual template copy in admin UI
 
 /**
  * Generate a random, pronounceable password
  * 8-12 characters: letters + digits, no special chars
  */
+const PASSWORD_ALGORITHM = 'aes-256-cbc';
+
+let cachedEncryptionKey = null;
+
+const deriveKeyBuffer = (rawKey) => {
+  if (!rawKey) {
+    throw new Error('ENCRYPTION_KEY must be defined in the environment');
+  }
+
+  const trimmed = rawKey.trim();
+
+  if (/^[0-9a-fA-F]{64}$/.test(trimmed)) {
+    return Buffer.from(trimmed, 'hex');
+  }
+
+  if (/^[A-Za-z0-9+/]{43}=*$/.test(trimmed)) {
+    return Buffer.from(trimmed, 'base64');
+  }
+
+  return Buffer.from(trimmed, 'utf8');
+};
+
+const getPasswordEncryptionKey = () => {
+  if (cachedEncryptionKey) {
+    return cachedEncryptionKey;
+  }
+
+  const rawKey = process.env.ENCRYPTION_KEY;
+  const buffer = deriveKeyBuffer(rawKey);
+
+  if (!buffer || buffer.length < 32) {
+    throw new Error('ENCRYPTION_KEY must resolve to a 32-byte value (use 32 ASCII chars, 32-byte base64, or 64-char hex)');
+  }
+
+  cachedEncryptionKey = buffer.subarray(0, 32);
+  return cachedEncryptionKey;
+};
+
+const encryptPassword = (plaintext) => {
+  if (!plaintext) return null;
+  try {
+    const key = getPasswordEncryptionKey();
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv(PASSWORD_ALGORITHM, key, iv);
+    let encrypted = cipher.update(plaintext, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return `${iv.toString('hex')}:${encrypted}`;
+  } catch (error) {
+    console.error('Failed to encrypt vendor password:', error.message);
+    return null;
+  }
+};
+
+const decryptPassword = (encrypted) => {
+  if (!encrypted) return null;
+  try {
+    const [ivHex, data] = encrypted.split(':');
+    if (!ivHex || !data) {
+      throw new Error('Invalid encrypted password format');
+    }
+    const key = getPasswordEncryptionKey();
+    const iv = Buffer.from(ivHex, 'hex');
+    const decipher = crypto.createDecipheriv(PASSWORD_ALGORITHM, key, iv);
+    let decrypted = decipher.update(data, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+  } catch (error) {
+    console.error('Failed to decrypt vendor password:', error.message);
+    return null;
+  }
+};
+
+const PASSWORD_AUDIT_ACTIONS = ['password_generated', 'password_reset', 'credentials_sent'];
+
+const extractPasswordFromAuditDetails = (details) => {
+  if (!details) {
+    return null;
+  }
+
+  if (typeof details.password === 'string' && details.password.trim()) {
+    return details.password.trim();
+  }
+
+  if (typeof details.temporaryPassword === 'string' && details.temporaryPassword.trim()) {
+    return details.temporaryPassword.trim();
+  }
+
+  if (typeof details.passwordEncrypted === 'string' && details.passwordEncrypted.trim()) {
+    return decryptPassword(details.passwordEncrypted.trim());
+  }
+
+  return null;
+};
+
+const hydrateAdminPasswords = async (vendors = []) => {
+  if (!Array.isArray(vendors) || vendors.length === 0) {
+    return vendors;
+  }
+
+  const vendorMeta = vendors.map((vendor) => {
+    const decrypted = decryptPassword(vendor.adminPasswordEncrypted);
+    return {
+      vendor,
+      vendorId: vendor._id?.toString() || null,
+      decrypted,
+      hasEncryptedValue: Boolean(vendor.adminPasswordEncrypted)
+    };
+  });
+
+  const missingMeta = vendorMeta.filter((meta) => !meta.decrypted && meta.vendorId);
+
+  let fallbackMap = new Map();
+  if (missingMeta.length > 0) {
+    const missingIds = missingMeta.map((meta) => meta.vendor._id);
+    const fallbackAudits = await VendorAuditModel.aggregate([
+      {
+        $match: {
+          vendorId: { $in: missingIds },
+          action: { $in: PASSWORD_AUDIT_ACTIONS }
+        }
+      },
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: '$vendorId',
+          details: { $first: '$details' },
+          action: { $first: '$action' },
+          createdAt: { $first: '$createdAt' }
+        }
+      }
+    ]);
+
+    fallbackMap = new Map(
+      fallbackAudits.map((entry) => {
+        const fallbackPassword = extractPasswordFromAuditDetails(entry.details);
+        return [entry._id.toString(), fallbackPassword || null];
+      })
+    );
+  }
+
+  const updatePromises = [];
+
+  const sanitizedVendors = vendorMeta.map((meta) => {
+    let password = meta.decrypted;
+
+    if (!password && meta.vendorId && fallbackMap.has(meta.vendorId)) {
+      const fallbackPassword = fallbackMap.get(meta.vendorId);
+      if (fallbackPassword) {
+        password = fallbackPassword;
+
+        if (!meta.hasEncryptedValue) {
+          const encrypted = encryptPassword(fallbackPassword);
+          if (encrypted) {
+            updatePromises.push(
+              VendorModel.updateOne(
+                { _id: meta.vendor._id },
+                { adminPasswordEncrypted: encrypted }
+              ).exec()
+            );
+          }
+        }
+      }
+    }
+
+    const { adminPasswordEncrypted, ...rest } = meta.vendor;
+    return {
+      ...rest,
+      adminPassword: password || null
+    };
+  });
+
+  if (updatePromises.length > 0) {
+    await Promise.allSettled(updatePromises);
+  }
+
+  return sanitizedVendors;
+};
+
 export const generateSecurePassword = () => {
   const vowels = 'aeiou';
   const consonants = 'bcdfghjklmnpqrstvwxyz';
@@ -77,11 +251,17 @@ export const createVendor = async (vendorData, adminEmail, ipAddress, userAgent,
     const notes = vendorData.notes;
     delete vendorData.notes;
     
+    const encryptedPassword = encryptPassword(temporaryPassword);
+    if (!encryptedPassword) {
+      throw new Error('Unable to secure vendor password. Please verify ENCRYPTION_KEY configuration.');
+    }
+
     // Create vendor
     const vendor = new VendorModel({
       ...vendorData,
       primaryEmail: vendorData.primaryEmail.toLowerCase(),
       passwordHash,
+      adminPasswordEncrypted: encryptedPassword,
       initialPasswordSet: false,
       createdBy: adminEmail,
       status: vendorData.status || 'pending',
@@ -110,12 +290,7 @@ export const createVendor = async (vendorData, adminEmail, ipAddress, userAgent,
       );
     }
     
-    // Generate WhatsApp URL if requested
-    let whatsappUrl = null;
-    if (notificationOptions.sendWhatsApp && notificationOptions.whatsappNumber) {
-      const whatsappMessage = generateVendorCredentialsWhatsApp(credentialsData);
-      whatsappUrl = generateWhatsAppUrl(notificationOptions.whatsappNumber, whatsappMessage);
-    }
+    // WhatsApp link generation removed (manual copy in Admin only)
     
     // Log audit with password (admin-only, stored in audit log for retrieval)
     await VendorAuditModel.create({
@@ -125,10 +300,9 @@ export const createVendor = async (vendorData, adminEmail, ipAddress, userAgent,
       details: {
         companyName: vendor.companyName,
         email: vendor.primaryEmail,
-        password: temporaryPassword, // Store in audit log for admin retrieval
+        passwordEncrypted: encryptedPassword,
         status: vendor.status,
-        emailSent: notificationOptions.sendEmail !== false,
-        whatsappSent: notificationOptions.sendWhatsApp === true
+        emailSent: notificationOptions.sendEmail !== false
       },
       ipAddress,
       userAgent
@@ -143,8 +317,7 @@ export const createVendor = async (vendorData, adminEmail, ipAddress, userAgent,
         companyName: vendor.companyName,
         email: vendor.primaryEmail,
         status: vendor.status,
-        emailSent: notificationOptions.sendEmail !== false,
-        whatsappSent: notificationOptions.sendWhatsApp === true
+        emailSent: notificationOptions.sendEmail !== false
       },
       ipAddress,
       userAgent
@@ -159,7 +332,7 @@ export const createVendor = async (vendorData, adminEmail, ipAddress, userAgent,
         createdAt: vendor.createdAt
       },
       temporaryPassword, // Return for admin reference (not stored in DB directly)
-      whatsappUrl // Return WhatsApp URL if generated
+      // WhatsApp URL removed
     };
   } catch (error) {
     throw error;
@@ -190,7 +363,12 @@ export const getVendors = async (filters = {}) => {
       .sort({ createdAt: -1 })
       .lean();
     
-    return vendors;
+    const hydrated = await hydrateAdminPasswords(vendors);
+
+    return hydrated.map(({ adminPassword, ...rest }) => ({
+      ...rest,
+      adminPasswordAvailable: Boolean(adminPassword)
+    }));
   } catch (error) {
     throw error;
   }
@@ -213,21 +391,95 @@ export const getVendorById = async (vendorId) => {
       .sort({ createdAt: -1 })
       .limit(50)
       .lean();
-    
-    // Get most recent password from audit log (admin-only)
-    const passwordAudit = await VendorAuditModel.findOne({
-      vendorId,
-      action: { $in: ['password_generated', 'password_reset'] }
-    })
-    .sort({ createdAt: -1 })
-    .lean();
-    
+
+    const [hydratedVendor] = await hydrateAdminPasswords([vendor]);
+
+    let sanitizedVendor = {
+      ...vendor,
+      adminPasswordAvailable: false
+    };
+
+    if (hydratedVendor) {
+      const { adminPassword, ...rest } = hydratedVendor;
+      sanitizedVendor = {
+        ...rest,
+        adminPasswordAvailable: Boolean(adminPassword)
+      };
+    }
+
     return {
-      vendor: {
-        ...vendor,
-        adminPassword: passwordAudit?.details?.password || null // Admin-only password
-      },
+      vendor: sanitizedVendor,
       auditLog
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getVendorPasswordForAdmin = async (vendorId, adminEmail, ipAddress, userAgent) => {
+  try {
+    const vendor = await VendorModel.findById(vendorId)
+      .select('adminPasswordEncrypted companyName primaryEmail status initialPasswordSet')
+      .lean();
+
+    if (!vendor) {
+      throw new Error('Vendor not found');
+    }
+
+    let password = decryptPassword(vendor.adminPasswordEncrypted);
+    let source = 'encrypted_store';
+
+    if (!password) {
+      const fallbackAudit = await VendorAuditModel.findOne({
+        vendorId,
+        action: { $in: PASSWORD_AUDIT_ACTIONS }
+      })
+        .sort({ createdAt: -1 })
+        .lean();
+
+      if (fallbackAudit) {
+        password = extractPasswordFromAuditDetails(fallbackAudit.details);
+        source = `audit:${fallbackAudit.action}`;
+
+        if (password && !vendor.adminPasswordEncrypted) {
+          const encrypted = encryptPassword(password);
+          if (encrypted) {
+            await VendorModel.updateOne(
+              { _id: vendorId },
+              { adminPasswordEncrypted: encrypted }
+            ).exec();
+          }
+        }
+      }
+    }
+
+    if (!password) {
+      throw new Error('Password not available. Reset the password to generate a new one.');
+    }
+
+    const maskedPassword = password.length <= 4
+      ? '•'.repeat(password.length)
+      : `${'•'.repeat(Math.max(0, password.length - 4))}${password.slice(-4)}`;
+
+    await VendorAuditModel.create({
+      vendorId,
+      adminId: adminEmail,
+      action: 'password_viewed',
+      details: {
+        method: source,
+        masked: maskedPassword,
+        initialPasswordSet: vendor.initialPasswordSet,
+        status: vendor.status,
+        email: vendor.primaryEmail
+      },
+      ipAddress,
+      userAgent
+    });
+
+    return {
+      password,
+      method: source,
+      initialPasswordSet: vendor.initialPasswordSet
     };
   } catch (error) {
     throw error;
@@ -318,8 +570,7 @@ export const updateVendorStatus = async (vendorId, newStatus, adminEmail, ipAddr
       details: {
         oldStatus,
         newStatus,
-        emailSent: notificationOptions.sendEmail !== false,
-        whatsappSent: notificationOptions.sendWhatsApp === true && newStatus === 'rejected'
+        emailSent: notificationOptions.sendEmail !== false
       },
       ipAddress,
       userAgent
@@ -329,8 +580,7 @@ export const updateVendorStatus = async (vendorId, newStatus, adminEmail, ipAddr
       vendor: vendor.toObject({ transform: (doc, ret) => {
         delete ret.passwordHash;
         return ret;
-      }}),
-      whatsappUrl
+      }})
     };
   } catch (error) {
     throw error;
@@ -349,7 +599,13 @@ export const resendCredentials = async (vendorId, adminEmail, ipAddress, userAge
     
     // Generate new password
     const temporaryPassword = generateSecurePassword();
+    const encryptedPassword = encryptPassword(temporaryPassword);
+    if (!encryptedPassword) {
+      throw new Error('Unable to secure vendor password. Please verify ENCRYPTION_KEY configuration.');
+    }
+
     vendor.passwordHash = await VendorModel.hashPassword(temporaryPassword);
+    vendor.adminPasswordEncrypted = encryptedPassword;
     vendor.initialPasswordSet = false;
     await vendor.save();
     
@@ -373,12 +629,7 @@ export const resendCredentials = async (vendorId, adminEmail, ipAddress, userAge
       );
     }
     
-    // Generate WhatsApp URL if requested
-    let whatsappUrl = null;
-    if (notificationOptions.sendWhatsApp && notificationOptions.whatsappNumber) {
-      const whatsappMessage = generateVendorCredentialsWhatsApp(credentialsData);
-      whatsappUrl = generateWhatsAppUrl(notificationOptions.whatsappNumber, whatsappMessage);
-    }
+    // WhatsApp link generation removed (manual copy in Admin only)
     
     // Log audit
     await VendorAuditModel.create({
@@ -388,7 +639,7 @@ export const resendCredentials = async (vendorId, adminEmail, ipAddress, userAge
       details: {
         email: vendor.primaryEmail,
         emailSent: notificationOptions.sendEmail !== false,
-        whatsappSent: notificationOptions.sendWhatsApp === true
+        passwordEncrypted: encryptedPassword
       },
       ipAddress,
       userAgent
@@ -398,7 +649,7 @@ export const resendCredentials = async (vendorId, adminEmail, ipAddress, userAge
       success: true,
       message: 'Credentials sent successfully',
       temporaryPassword,
-      whatsappUrl
+      // WhatsApp URL removed
     };
   } catch (error) {
     throw error;
@@ -417,7 +668,13 @@ export const resetVendorPassword = async (vendorId, adminEmail, ipAddress, userA
     
     // Generate new password
     const temporaryPassword = generateSecurePassword();
+    const encryptedPassword = encryptPassword(temporaryPassword);
+    if (!encryptedPassword) {
+      throw new Error('Unable to secure vendor password. Please verify ENCRYPTION_KEY configuration.');
+    }
+
     vendor.passwordHash = await VendorModel.hashPassword(temporaryPassword);
+    vendor.adminPasswordEncrypted = encryptedPassword;
     vendor.initialPasswordSet = false;
     await vendor.save();
     
@@ -446,7 +703,8 @@ export const resetVendorPassword = async (vendorId, adminEmail, ipAddress, userA
       action: 'password_reset',
       details: {
         email: vendor.primaryEmail,
-        password: temporaryPassword // Store in audit log for admin retrieval
+        password: temporaryPassword, // Legacy support for existing audit readers
+        passwordEncrypted: encryptedPassword
       },
       ipAddress,
       userAgent

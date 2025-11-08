@@ -7,7 +7,7 @@
  * @component
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
@@ -16,12 +16,31 @@ const SettingsPreview = ({ settings, onApplyAll }) => {
   const apiBase = (import.meta.env.VITE_API_BASE_URL && String(import.meta.env.VITE_API_BASE_URL).trim().replace(/\/+$/, '')) || 'http://localhost:3000';
 
   const logoUrl = settings?.logoUrl ? `${apiBase}${settings.logoUrl}` : null;
-  const theme = settings?.theme || {
+  const [mode, setMode] = useState(settings?.activeThemeMode === 'dark' ? 'dark' : 'light');
+  const theme = (mode === 'dark' ? settings?.themeDark : settings?.themeLight) || settings?.theme || {
     primary: '#E43636',
+    secondary: '#E2DDB4',
     background: '#F6EFD2',
-    surface: '#E2DDB4',
-    text: '#000000'
+    surface: '#FFFFFF',
+    text: '#000000',
+    button: '#E43636'
   };
+
+  const getReadableText = (hex) => {
+    if (!hex) return '#FFFFFF';
+    const color = hex.replace('#', '');
+    const r = parseInt(color.substring(0, 2), 16) / 255;
+    const g = parseInt(color.substring(2, 4), 16) / 255;
+    const b = parseInt(color.substring(4, 6), 16) / 255;
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return luminance > 0.55 ? '#000000' : '#FFFFFF';
+  };
+
+  useEffect(() => {
+    if (settings?.activeThemeMode) {
+      setMode(settings.activeThemeMode === 'dark' ? 'dark' : 'light');
+    }
+  }, [settings?.activeThemeMode]);
 
   const handleApplyAll = async () => {
     if (!settings) {
@@ -81,12 +100,18 @@ const SettingsPreview = ({ settings, onApplyAll }) => {
         )
       );
 
-      // Save theme (use current theme values)
-      if (settings.theme) {
+      // Save theme (support advanced payload)
+      if (settings.themeLight || settings.themeDark || settings.theme) {
+        const lightPayload = settings.themeLight || settings.theme;
+        const darkPayload = settings.themeDark || settings.theme;
         promises.push(
           axios.put(
             `${apiBase}/api/admin/settings/theme`,
-            settings.theme,
+            {
+              lightTheme: lightPayload,
+              darkTheme: darkPayload,
+              activeThemeMode: settings.activeThemeMode || mode
+            },
             { withCredentials: true }
           )
         );
@@ -95,12 +120,16 @@ const SettingsPreview = ({ settings, onApplyAll }) => {
       await Promise.all(promises);
 
       // Apply theme to document immediately
-      if (settings.theme) {
+      if (settings.themeLight || settings.themeDark || settings.theme) {
         const root = document.documentElement;
-        root.style.setProperty('--brand-primary', settings.theme.primary);
-        root.style.setProperty('--bg-light', settings.theme.background);
-        root.style.setProperty('--bg-surface', settings.theme.surface);
-        root.style.setProperty('--text-primary', settings.theme.text);
+        const active = (mode === 'dark' ? settings.themeDark : settings.themeLight) || settings.theme;
+        root.style.setProperty('--brand-primary', active.primary);
+        root.style.setProperty('--brand-secondary', active.secondary || '#E2DDB4');
+        root.style.setProperty('--bg-light', active.background);
+        root.style.setProperty('--bg-surface', active.surface);
+        root.style.setProperty('--text-primary', active.text);
+        root.style.setProperty('--button-bg', active.button || active.primary);
+        root.style.setProperty('--button-text', getReadableText(active.button || active.primary));
       }
 
       // Update favicon if available
@@ -143,10 +172,16 @@ const SettingsPreview = ({ settings, onApplyAll }) => {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <div>
+        <div className="flex items-center gap-3">
           <h2 className="text-3xl font-bold" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
             Preview
           </h2>
+          <div className="glass-card rounded-xl p-1 border border-theme-base/30">
+            <div className="flex">
+              <button onClick={() => setMode('light')} className={`px-3 py-1 rounded-lg text-sm ${mode==='light'?'bg-brand-primary text-black':'text-theme-primary hover:bg-theme-surface/50'}`}>Light</button>
+              <button onClick={() => setMode('dark')} className={`px-3 py-1 rounded-lg text-sm ${mode==='dark'?'bg-brand-primary text-black':'text-theme-primary hover:bg-theme-surface/50'}`}>Dark</button>
+            </div>
+          </div>
           <p className="text-black mt-2">
             Preview how your settings will appear on the landing page.
           </p>
@@ -176,55 +211,55 @@ const SettingsPreview = ({ settings, onApplyAll }) => {
         </div>
       </div>
 
-      {/* Preview Container */}
+      {/* Preview Container (Condensed hero) */}
       <div
-        className="glass-card rounded-3xl p-12"
+        className="glass-card rounded-3xl p-8 sm:p-12"
         style={{
           backgroundColor: theme.background,
           color: theme.text
         }}
       >
         {/* Logo & Site Name */}
-        <div className="flex items-center justify-center gap-4 mb-8">
+        <div className="flex items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-8">
           {logoUrl && (
             <img
               src={logoUrl}
               alt="Logo"
-              className="h-12 w-auto"
+              className="h-8 sm:h-10 w-auto"
             />
           )}
-          <h1 className="text-3xl font-bold" style={{ color: theme.primary }}>
+          <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: theme.primary }}>
             {settings?.siteName || 'Next Subscription'}
           </h1>
         </div>
 
         {/* Hero Section Preview */}
-        <div className="text-center space-y-6 mb-12">
-          <h2 className="text-4xl font-bold" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
+        <div className="text-center space-y-4 sm:space-y-6 mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-4xl font-bold" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
             {settings?.heroHeadline || 'Simplify how you manage your subscriptions — securely and beautifully.'}
           </h2>
-          <p className="text-lg text-theme-secondary max-w-2xl mx-auto">
+          <p className="text-sm sm:text-lg text-theme-secondary max-w-2xl mx-auto">
             {settings?.heroTagline || 'Take control of your recurring payments with intelligent tracking, automated reminders, and powerful insights — all in one elegant platform.'}
           </p>
         </div>
 
         {/* Primary Heading Preview */}
-        <div className="mb-8">
-          <h3 className="text-2xl font-semibold mb-4" style={{ color: theme.primary }}>
+        <div className="mb-6 sm:mb-8">
+          <h3 className="text-lg sm:text-2xl font-semibold mb-3 sm:mb-4" style={{ color: theme.primary }}>
             {settings?.primaryHeading || 'For Subscribers'}
           </h3>
         </div>
 
         {/* Button Preview */}
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-3 sm:gap-4">
           <button
-            className="px-8 py-4 rounded-full font-semibold text-white shadow-lg transition-all hover:shadow-xl"
-            style={{ backgroundColor: theme.primary }}
+            className="px-5 sm:px-8 py-3 sm:py-4 rounded-full font-semibold shadow-lg transition-all hover:shadow-xl"
+            style={{ backgroundColor: theme.button || theme.primary, color: getReadableText(theme.button || theme.primary) }}
           >
-            Get Started
+            {settings?.ctaText || 'Get Started'}
           </button>
           <button
-            className="px-8 py-4 rounded-full font-semibold border-2 transition-all"
+            className="px-5 sm:px-8 py-3 sm:py-4 rounded-full font-semibold border-2 transition-all"
             style={{
               borderColor: theme.primary,
               color: theme.primary,
@@ -238,7 +273,7 @@ const SettingsPreview = ({ settings, onApplyAll }) => {
         {/* Color Palette Preview */}
         <div className="mt-12 pt-8 border-t border-theme-base">
           <h4 className="text-lg font-semibold mb-4">Color Palette</h4>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             <div className="text-center">
               <div
                 className="w-full h-20 rounded-lg mb-2 border border-theme-base"
@@ -246,6 +281,14 @@ const SettingsPreview = ({ settings, onApplyAll }) => {
               />
               <p className="text-xs font-medium">Primary</p>
               <p className="text-xs text-theme-secondary font-mono">{theme.primary}</p>
+            </div>
+            <div className="text-center">
+              <div
+                className="w-full h-20 rounded-lg mb-2 border border-theme-base"
+                style={{ backgroundColor: theme.secondary || '#E2DDB4' }}
+              />
+              <p className="text-xs font-medium">Secondary</p>
+              <p className="text-xs text-theme-secondary font-mono">{theme.secondary || '#E2DDB4'}</p>
             </div>
             <div className="text-center">
               <div
@@ -270,6 +313,14 @@ const SettingsPreview = ({ settings, onApplyAll }) => {
               />
               <p className="text-xs font-medium">Text</p>
               <p className="text-xs text-theme-secondary font-mono">{theme.text}</p>
+            </div>
+            <div className="text-center">
+              <div
+                className="w-full h-20 rounded-lg mb-2 border border-theme-base"
+                style={{ backgroundColor: theme.button || theme.primary, color: getReadableText(theme.button || theme.primary) }}
+              />
+              <p className="text-xs font-medium">Button</p>
+              <p className="text-xs text-theme-secondary font-mono">{theme.button || theme.primary}</p>
             </div>
           </div>
         </div>

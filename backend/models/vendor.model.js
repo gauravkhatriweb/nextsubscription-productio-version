@@ -58,6 +58,11 @@ const vendorSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  adminPasswordEncrypted: {
+    type: String,
+    default: null,
+    select: true
+  },
   initialPasswordSet: {
     type: Boolean,
     default: false

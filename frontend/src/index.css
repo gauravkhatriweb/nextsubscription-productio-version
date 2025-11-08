@@ -5,7 +5,7 @@
 /* Custom scrollbar styles for search dropdown */
 .search-dropdown-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  scrollbar-color: var(--theme-border-subtle) transparent;
 }
 
 .search-dropdown-scrollbar::-webkit-scrollbar {
@@ -17,13 +17,13 @@
 }
 
 .search-dropdown-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
+  background-color: var(--theme-border-subtle);
   border-radius: 3px;
   border: none;
 }
 
 .search-dropdown-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(156, 163, 175, 0.7);
+  background-color: var(--theme-border-focus);
 }
 
 /* Smooth scrolling for mobile */

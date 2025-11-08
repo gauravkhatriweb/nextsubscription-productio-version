@@ -3,38 +3,37 @@ import { Link } from 'react-router-dom'
 
 const TermsPage = () => {
   return (
-    <div className='relative min-h-screen w-full bg-[#000000] text-white overflow-hidden'>
-      {/* Ambient gradient orbs */}
-      <div className='pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-[#E43636] via-[#F6EFD2] to-[#E2DDB4] blur-3xl opacity-30' />
-      <div className='pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-[#E2DDB4] via-[#E43636] to-[#F6EFD2] blur-3xl opacity-25' />
+    <div className='relative min-h-screen w-full bg-[var(--theme-background)] text-[var(--theme-text)] overflow-hidden'>
+      <div className='pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-[var(--theme-primary)]/20 via-[var(--theme-secondary)]/10 to-[var(--theme-accent)]/10 blur-3xl opacity-40' />
+      <div className='pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-[var(--theme-primary)]/15 via-[var(--theme-secondary)]/10 to-[var(--theme-accent)]/10 blur-3xl opacity-30' />
 
       <main className='relative z-10 mx-auto max-w-4xl px-6 py-12 sm:py-16'>
         <header className='mb-6 sm:mb-8'>
-          <h1 className='text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight'>Next Subscription – Terms & Conditions</h1>
-          <p className='mt-2 text-sm text-gray-300'>Please read these terms carefully before using our Services.</p>
+          <h1 className='text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[var(--theme-text)]'>Next Subscription – Terms & Conditions</h1>
+          <p className='mt-2 text-[var(--theme-text-secondary)]'>Please read these terms carefully before using our Services.</p>
         </header>
 
         <article className='prose prose-invert max-w-none'>
-          <section className='rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-7 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.35)]'>
+          <section className='rounded-2xl border border-[var(--theme-glass-border)] bg-[var(--theme-glass-background)] p-5 sm:p-7 backdrop-blur-md shadow-[var(--theme-glass-shadow)]'>
             <ol className='space-y-6 list-decimal pl-5'>
               <li>
-                <h2 className='text-lg font-semibold mb-1'>Introduction</h2>
-                <p className='text-sm text-gray-300'>
+                <h2 className='text-lg font-semibold mb-1 text-[var(--theme-text)]'>Introduction</h2>
+                <p className='text-[var(--theme-text-secondary)]'>
                 Welcome to Next Subscription. These Terms and Conditions govern your access to and use of the Next Subscription mobile application, website, and all related services, collectively referred to as the Services. By registering for, accessing, or using our Services, you acknowledge that you have read, understood, and agreed to be legally bound by these Terms. These Terms constitute a valid, binding, and enforceable contract under the Contract Act 1872, the Electronic Transactions Ordinance 2002, and all other applicable laws, rules, and regulations of Pakistan. If you do not agree to these Terms, you must refrain from using the Services immediately.
                 </p>
               </li>
               <li>
-                <h2 className='text-lg font-semibold mb-1'>Eligibility & Registration</h2>
-                <p className='text-sm text-gray-300'>
+                <h2 className='text-lg font-semibold mb-1 text-[var(--theme-text)]'>Eligibility & Registration</h2>
+                <p className='text-[var(--theme-text-secondary)]'>
                   To use Next Subscription, you must be at least 18 years of age, possess legal capacity under Pakistani law, and provide accurate registration details. By creating an account, you warrant that the information provided is true, complete, and not misleading. Next Subscription reserves the right to verify user identity and decline or terminate accounts where false information is detected.
                 </p>
               </li>
               <li>
-                <h2 className='text-lg font-semibold mb-1'>User Responsibilities</h2>
-                <p className='text-sm text-gray-300'>
+                <h2 className='text-lg font-semibold mb-1 text-[var(--theme-text)]'>User Responsibilities</h2>
+                <p className='text-[var(--theme-text-secondary)]'>
                   Users (Subscribers, Providers, and Business Owners) agree to:
                 </p>
-                <ul className='mt-2 list-disc pl-5 text-sm text-gray-300 space-y-1'>
+                <ul className='mt-2 list-disc pl-5 text-[var(--theme-text-secondary)] space-y-1'>
                   <li>Provide accurate personal and payment information.</li>
                   <li>Comply with all applicable laws, regulations, and licensing requirements in Pakistan.</li>
                   <li>Avoid using the Platform for unlawful, fraudulent, or unauthorized activities.</li>
@@ -42,56 +41,56 @@ const TermsPage = () => {
                 </ul>
               </li>
               <li>
-                <h2 className='text-lg font-semibold mb-1'>Safety & Conduct</h2>
-                <p className='text-sm text-gray-300'>
+                <h2 className='text-lg font-semibold mb-1 text-[var(--theme-text)]'>Safety & Conduct</h2>
+                <p className='text-[var(--theme-text-secondary)]'>
                   Next Subscription prioritizes the safety of its subscribers and providers. Any act of harassment, misconduct, intoxication, or breach of public decency under Pakistani Penal Code (PPC) will result in suspension or permanent removal from the Platform. The Company reserves the right to cooperate with law enforcement agencies where criminal activities are suspected.
                 </p>
               </li>
               <li>
-                <h2 className='text-lg font-semibold mb-1'>Payment & Pricing</h2>
-                <p className='text-sm text-gray-300'>
+                <h2 className='text-lg font-semibold mb-1 text-[var(--theme-text)]'>Payment & Pricing</h2>
+                <p className='text-[var(--theme-text-secondary)]'>
                   All pricing is calculated as per the algorithm shown at the time of subscription. Users agree to timely payment through approved methods (cash, debit/credit card, digital wallets, etc.). Any default in payment may be pursued under civil and commercial laws of Pakistan, including but not limited to recovery suits.
                 </p>
               </li>
               <li>
-                <h2 className='text-lg font-semibold mb-1'>Liability & Disclaimer</h2>
-                <p className='text-sm text-gray-300'>
+                <h2 className='text-lg font-semibold mb-1 text-[var(--theme-text)]'>Liability & Disclaimer</h2>
+                <p className='text-[var(--theme-text-secondary)]'>
                   Next Subscription acts solely as a technology platform connecting subscribers with providers. The Company is not a service provider and does not own services used by providers. Accordingly, Next Subscription is not liable for personal injury, property damage, service disruptions, or delays except where caused by gross negligence or willful misconduct on its part. Users acknowledge that services are undertaken at their own risk.
                 </p>
               </li>
               <li>
-                <h2 className='text-lg font-semibold mb-1'>Data Protection & Privacy</h2>
-                <p className='text-sm text-gray-300'>
+                <h2 className='text-lg font-semibold mb-1 text-[var(--theme-text)]'>Data Protection & Privacy</h2>
+                <p className='text-[var(--theme-text-secondary)]'>
                   Next Subscription respects user privacy in accordance with the Personal Data Protection Bill, 2023 (pending enactment) and the Prevention of Electronic Crimes Act, 2016 (PECA). User information shall only be used for providing services, improving safety, and complying with lawful requests by authorities.
                 </p>
               </li>
               <li>
-                <h2 className='text-lg font-semibold mb-1'>Termination of Services</h2>
-                <p className='text-sm text-gray-300'>
+                <h2 className='text-lg font-semibold mb-1 text-[var(--theme-text)]'>Termination of Services</h2>
+                <p className='text-[var(--theme-text-secondary)]'>
                   Next Subscription may suspend or terminate accounts without prior notice if a user breaches these Terms, engages in unlawful conduct, or harms the reputation and integrity of the Platform. Users may voluntarily terminate their accounts by written notice or through the app.
                 </p>
               </li>
               <li>
-                <h2 className='text-lg font-semibold mb-1'>Governing Law & Jurisdiction</h2>
-                <p className='text-sm text-gray-300'>
+                <h2 className='text-lg font-semibold mb-1 text-[var(--theme-text)]'>Governing Law & Jurisdiction</h2>
+                <p className='text-[var(--theme-text-secondary)]'>
                   These Terms shall be governed by and construed in accordance with the laws of Pakistan. Any disputes arising from these Terms shall fall under the exclusive jurisdiction of the courts of Karachi, Sindh, unless otherwise agreed.
                 </p>
               </li>
               <li>
-                <h2 className='text-lg font-semibold mb-1'>Amendments</h2>
-                <p className='text-sm text-gray-300'>
+                <h2 className='text-lg font-semibold mb-1 text-[var(--theme-text)]'>Amendments</h2>
+                <p className='text-[var(--theme-text-secondary)]'>
                   Next Subscription reserves the right to amend these Terms at any time. Continued use of the Services after such amendments constitutes acceptance of the updated Terms. Users are advised to review these Terms periodically.
                 </p>
               </li>
               <li>
-                <h2 className='text-lg font-semibold mb-1'>Force Majeure</h2>
-                <p className='text-sm text-gray-300'>
+                <h2 className='text-lg font-semibold mb-1 text-[var(--theme-text)]'>Force Majeure</h2>
+                <p className='text-[var(--theme-text-secondary)]'>
                   Next Subscription shall not be held liable for delays, failures, or disruptions due to causes beyond its reasonable control, including but not limited to natural disasters, strikes, government restrictions, or technical outages.
                 </p>
               </li>
               <li>
-                <h2 className='text-lg font-semibold mb-1'>Acceptance</h2>
-                <p className='text-sm text-gray-300'>
+                <h2 className='text-lg font-semibold mb-1 text-[var(--theme-text)]'>Acceptance</h2>
+                <p className='text-[var(--theme-text-secondary)]'>
                   By registering or using Next Subscription, you acknowledge that you have read, understood, and agreed to these Terms, thereby creating a legally binding agreement under Pakistani law.
                 </p>
               </li>
@@ -101,13 +100,13 @@ const TermsPage = () => {
           <div className='mt-8 flex items-center justify-center'>
             <Link
               to='/'
-              className='inline-flex items-center justify-center rounded-full bg-black px-6 py-3 text-sm font-bold text-white ring-1 ring-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.35)] hover:scale-[1.01] transition'
+              className='inline-flex items-center justify-center rounded-full bg-[var(--theme-surface)] px-6 py-3 text-sm font-bold text-[var(--theme-text)] ring-1 ring-[var(--theme-border)] shadow-[var(--theme-shadow-small)] hover:scale-[1.01] transition'
             >
               Back to Home
             </Link>
           </div>
 
-          <footer className='mt-6 text-xs text-gray-400'>
+          <footer className='mt-6 text-xs text-[var(--theme-text-subtle)]'>
             Last updated: {new Date().toLocaleDateString()}
           </footer>
         </article>

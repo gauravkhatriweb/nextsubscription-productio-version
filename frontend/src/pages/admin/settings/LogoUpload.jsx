@@ -14,6 +14,7 @@ const LogoUpload = ({ currentLogo, onUpdate }) => {
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [error, setError] = useState('');
   const fileInputRef = useRef(null);
   const apiBase = (import.meta.env.VITE_API_BASE_URL && String(import.meta.env.VITE_API_BASE_URL).trim().replace(/\/+$/, '')) || 'http://localhost:3000';
 
@@ -44,27 +45,30 @@ const LogoUpload = ({ currentLogo, onUpdate }) => {
   };
 
   const handleFile = async (file) => {
-    // Validate file type
+    // FIX: Validate logo upload type & size before sending
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'];
     if (!allowedTypes.includes(file.type)) {
-      toast.error('Logo must be PNG, JPG, or SVG');
+      setError('Invalid file type. Accepted formats: PNG, JPG, JPEG, SVG');
+      toast.error('Logo must be PNG, JPG, JPEG, or SVG');
       return;
     }
 
-    // Validate file size (2MB)
     if (file.size > 2 * 1024 * 1024) {
+      setError('File too large. Maximum size is 2MB');
       toast.error('Logo must be less than 2MB');
       return;
     }
 
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreview(e.target.result);
-    };
-    reader.readAsDataURL(file);
+    setError('');
 
-    // Upload file
+    let objectUrl;
+    try {
+      objectUrl = URL.createObjectURL(file);
+      setPreview(objectUrl);
+    } catch (error) {
+      toast.error('Unable to generate preview for this file');
+    }
+
     setUploading(true);
     try {
       const formData = new FormData();
@@ -82,12 +86,20 @@ const LogoUpload = ({ currentLogo, onUpdate }) => {
       );
 
       if (response.data.success) {
-        toast.success('Logo uploaded successfully');
+        toast.success('✅ Logo updated successfully');
         onUpdate({ logoUrl: response.data.settings.logoUrl });
-        setPreview(null); // Clear preview after successful upload
+        if (objectUrl) {
+          try { URL.revokeObjectURL(objectUrl); } catch {}
+        }
+        setPreview(null);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to upload logo');
+      const message = error.response?.data?.message || 'Failed to upload logo';
+      setError(message);
+      toast.error(message);
+      if (objectUrl) {
+        try { URL.revokeObjectURL(objectUrl); } catch {}
+      }
       setPreview(null);
     } finally {
       setUploading(false);
@@ -98,11 +110,19 @@ const LogoUpload = ({ currentLogo, onUpdate }) => {
     if (!window.confirm('Are you sure you want to delete the logo? This cannot be undone.')) {
       return;
     }
-
     try {
-      // Note: Backend should handle deletion. For now, we'll just clear it.
-      toast.info('Logo deletion will be implemented in backend');
+      const response = await axios.put(
+        `${apiBase}/api/admin/settings/branding`,
+        { deleteLogo: true },
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        toast.success('Logo removed');
+        onUpdate({ logoUrl: null });
+        setError('');
+      }
     } catch (error) {
+      setError('Failed to delete logo');
       toast.error('Failed to delete logo');
     }
   };
@@ -110,33 +130,41 @@ const LogoUpload = ({ currentLogo, onUpdate }) => {
   const displayUrl = preview || (currentLogo ? `${apiBase}${currentLogo}` : null);
 
   return (
-    <div>
-      <label className="block text-sm font-medium mb-4">Site Logo</label>
-      
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-theme-primary">Site Logo</h3>
+          <p className="text-xs text-theme-secondary">PNG, JPG, or SVG • Max 2MB • Recommended width ≥ 400px</p>
+        </div>
+      </div>
+
       {/* Preview */}
       {displayUrl && (
-        <div className="mb-4">
-          <div className="glass-card rounded-xl p-6 inline-block">
-            <img
-              src={displayUrl}
-              alt="Logo preview"
-              className="max-h-32 max-w-full object-contain"
-            />
-          </div>
+        <div className="glass-card rounded-2xl p-4 border border-theme-base/30 inline-flex items-center justify-center max-w-sm">
+          <img
+            src={displayUrl}
+            alt="Logo preview"
+            className="max-h-32 max-w-full object-contain"
+          />
         </div>
       )}
 
-      {/* Upload Area */}
       <div
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
-          dragActive
-            ? 'border-brand-primary bg-brand-primary/10'
-            : 'border-theme-base hover:border-brand-primary/50'
-        }`}
+        className={`glass-card rounded-2xl border border-dashed p-6 sm:p-8 text-center transition-all backdrop-blur-md cursor-pointer ${
+          dragActive ? 'border-brand-primary bg-brand-primary/10 shadow-theme-brand' : 'border-theme-base/40 hover:border-brand-primary/60'
+        } ${uploading ? 'opacity-80 pointer-events-none' : ''}`}
+        role="button"
+        tabIndex={0}
+        onClick={() => !uploading && fileInputRef.current?.click()}
+        onKeyDown={(event) => {
+          if ((event.key === 'Enter' || event.key === ' ') && !uploading) {
+            fileInputRef.current?.click();
+          }
+        }}
       >
         <input
           ref={fileInputRef}
@@ -145,44 +173,38 @@ const LogoUpload = ({ currentLogo, onUpdate }) => {
           onChange={handleFileSelect}
           className="hidden"
         />
-        
+
         {uploading ? (
-          <div className="space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary mx-auto"></div>
-            <p className="text-theme-secondary">Uploading...</p>
+          <div className="space-y-3">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-primary mx-auto"></div>
+            <p className="text-sm text-theme-secondary">Uploading logo…</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="text-4xl mb-2">📤</div>
-            <p className="text-theme-primary font-medium">
-              Drag and drop your logo here, or{' '}
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="text-brand-primary hover:underline"
-              >
-                browse
-              </button>
+          <div className="space-y-3">
+            <div className="text-4xl">📤</div>
+            <p className="text-sm sm:text-base text-theme-primary font-medium">
+              Drag & drop your logo or <span className="text-brand-primary underline">browse</span>
             </p>
-            <p className="text-sm text-theme-secondary">
-              PNG, JPG, or SVG (max 2MB)
-            </p>
+            <p className="text-xs text-theme-secondary">High-resolution PNG recommended. Transparent background preferred.</p>
           </div>
         )}
       </div>
 
-      {/* Actions */}
-      {currentLogo && (
-        <div className="mt-4 flex gap-4">
+      {error && (
+        <p className="text-xs text-error">{error}</p>
+      )}
+
+      {currentLogo && !uploading && (
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="px-4 py-2 rounded-lg bg-theme-surface text-theme-primary hover:bg-theme-base transition-colors"
+            className="btn-standard bg-theme-surface text-theme-primary border border-theme-base/40 hover:bg-theme-surface/70 transition-theme"
           >
             Replace Logo
           </button>
           <button
             onClick={handleDelete}
-            className="px-4 py-2 rounded-lg bg-error/10 text-error hover:bg-error/20 transition-colors"
+            className="btn-standard bg-error/10 text-error border border-error/20 hover:bg-error/20 transition-theme"
           >
             Delete Logo
           </button>

@@ -8,6 +8,8 @@
  */
 
 import os from 'os';
+import path from 'path';
+import { performance } from 'node:perf_hooks';
 import mongoose from 'mongoose';
 import SystemActionModel from '../models/systemAction.model.js';
 
@@ -38,6 +40,59 @@ const calculateCpuUsage = () => {
   return Math.max(0, Math.min(100, usage)); // Clamp between 0-100
 };
 
+// FIX: Derive disk usage from filesystem statistics instead of mock data
+const resolveDiskUsage = async () => {
+  try {
+    const { statfs } = await import('node:fs/promises');
+    if (typeof statfs !== 'function') {
+      return null;
+    }
+
+    const rootPath = path.parse(process.cwd()).root || '/';
+    const stats = await statfs(rootPath);
+    const blockSize = BigInt(stats.bsize);
+    const totalBlocks = BigInt(stats.blocks);
+    const availableBlocks = typeof stats.bavail === 'number' && stats.bavail >= 0
+      ? BigInt(stats.bavail)
+      : BigInt(stats.bfree);
+
+    if (totalBlocks === 0n) {
+      return null;
+    }
+
+    const totalBytes = blockSize * totalBlocks;
+    const availableBytes = blockSize * availableBlocks;
+    const usedBytes = totalBytes - availableBytes;
+
+    const usage = Number((usedBytes * 100n) / totalBytes);
+    return Math.max(0, Math.min(100, usage));
+  } catch (error) {
+    return null;
+  }
+};
+
+// FIX: Measure API latency using the live /health endpoint instead of synthetic values
+const measureApiLatency = async () => {
+  const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+  const fallbackHost = `http://127.0.0.1:${port}/health`;
+  const target = process.env.SYSTEM_HEALTH_URL || fallbackHost;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3000);
+
+  try {
+    const start = performance.now();
+    const response = await fetch(target, { signal: controller.signal });
+    await response.text();
+    const elapsed = Math.round(performance.now() - start);
+    return Math.max(0, elapsed);
+  } catch (error) {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
 export const getSystemStatus = async () => {
   try {
     // Get CPU usage (real calculation based on OS CPU times)
@@ -49,18 +104,14 @@ export const getSystemStatus = async () => {
     const usedMem = totalMem - freeMem;
     const memoryUsage = Math.floor((usedMem / totalMem) * 100);
     
-    // Get disk usage (simplified - would need a library like 'diskusage' for actual disk stats)
-    // For now, estimate based on memory usage as a proxy
-    const diskUsage = Math.floor(Math.min(90, memoryUsage * 0.5 + 20)); // Estimate based on memory
+    const diskUsageValue = await resolveDiskUsage();
     
     // Get database latency (REAL - actual MongoDB ping)
     const dbStart = Date.now();
     await mongoose.connection.db.admin().ping();
     const dbLatency = Date.now() - dbStart;
     
-    // Get API latency (simulated - in production, this would track actual API response times)
-    // For now, use a baseline + small variation
-    const apiLatency = Math.floor(dbLatency * 2 + Math.random() * 50 + 50); // Based on DB latency
+    const apiLatencyValue = await measureApiLatency();
     
     // Get active users (REAL - count total registered users)
     // Note: In production, this would track actual active sessions or recent logins
@@ -76,8 +127,8 @@ export const getSystemStatus = async () => {
     return {
       cpuUsage: `${cpuUsage}%`,
       memoryUsage: `${memoryUsage}%`,
-      diskUsage: `${diskUsage}%`,
-      apiLatency: `${apiLatency}ms`,
+      diskUsage: diskUsageValue !== null ? `${diskUsageValue}%` : 'N/A',
+      apiLatency: apiLatencyValue !== null ? `${apiLatencyValue}ms` : 'N/A',
       dbLatency: `${dbLatency}ms`,
       activeUsers,
       uptime: uptimePercentage,

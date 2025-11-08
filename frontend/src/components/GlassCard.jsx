@@ -54,10 +54,12 @@ const GlassCard = ({
     xl: 'p-10'
   };
 
-  // Base glass styles using canonical theme tokens
+  // Base glass styles using theme tokens
   const baseClasses = [
-    // Canonical glassmorphism background
-    'glass-card',
+    // Theme-based glassmorphism background
+    'bg-[var(--theme-glass-background)]',
+    'border',
+    'border-[var(--theme-glass-border)]',
     // Size
     sizeVariants[size],
     // Padding
@@ -75,12 +77,17 @@ const GlassCard = ({
 
   if (!shadow) {
     baseClasses.push('shadow-none');
+  } else {
+    baseClasses.push('shadow-[var(--theme-glass-shadow)]');
   }
 
   // Override blur if different from canonical
   if (blur !== 'md') {
     baseClasses.push(blurVariants[blur]);
   }
+
+  // Add hover effect
+  baseClasses.push('hover:bg-[var(--theme-glass-hover-background)]');
 
   // Combine all classes
   const combinedClasses = [...baseClasses, className].filter(Boolean).join(' ');
@@ -91,7 +98,5 @@ const GlassCard = ({
     </div>
   );
 };
-
-
 
 export default GlassCard;

@@ -26,12 +26,78 @@ const VendorDetail = () => {
   });
   const [whatsappModal, setWhatsappModal] = useState(false);
   const [copiedPassword, setCopiedPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordInfo, setPasswordInfo] = useState({ value: null, loading: false, available: false });
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordModal, setPasswordModal] = useState({ open: false, password: '', context: null });
 
   const apiBase = (import.meta.env.VITE_API_BASE_URL && String(import.meta.env.VITE_API_BASE_URL).trim().replace(/\/+$/, '')) || 'http://localhost:3000';
+  const actionTileClass = 'glass-card rounded-2xl p-5 text-left border border-theme-base/30 hover:border-brand-primary/50 hover:bg-brand-secondary/10 transition-all flex items-center gap-4 disabled:opacity-50 disabled:cursor-not-allowed';
 
   useEffect(() => {
     fetchVendor();
   }, [id]);
+
+  useEffect(() => {
+  setShowPassword(false);
+  setCopiedPassword(false);
+}, [passwordInfo.value]);
+
+const fetchVendorPassword = async ({ silent = false } = {}) => {
+  if (!id) return null;
+
+  setPasswordError('');
+  setPasswordInfo((prev) => ({ ...prev, loading: true }));
+
+  try {
+    const response = await axios.get(`${apiBase}/api/admin/vendors/${id}/password`, {
+      withCredentials: true
+    });
+
+    if (response.data?.success && response.data.password) {
+      const password = response.data.password;
+      setPasswordInfo({ value: password, loading: false, available: true });
+      return password;
+    }
+
+    const message = response.data?.message || 'Password not available. Reset to generate a new one.';
+    setPasswordInfo({ value: null, loading: false, available: false });
+    setPasswordError(message);
+    if (!silent) {
+      toast.info(message);
+    }
+    return null;
+  } catch (error) {
+    const message = error.response?.data?.message || 'Failed to retrieve password';
+    setPasswordInfo({ value: null, loading: false, available: false });
+    setPasswordError(message);
+    if (!silent) {
+      toast.error(message);
+    }
+    return null;
+  }
+};
+
+const handlePasswordCopy = () => {
+  if (!passwordInfo.value) {
+    toast.info(passwordError || 'Password not available.');
+    return;
+  }
+  navigator.clipboard.writeText(passwordInfo.value);
+  setCopiedPassword(true);
+  toast.success('Password copied!');
+  setTimeout(() => setCopiedPassword(false), 2000);
+};
+
+const closePasswordModal = () => {
+  setPasswordModal({ open: false, password: '', context: null });
+};
+
+const handlePasswordModalCopy = () => {
+  if (!passwordModal.password) return;
+  navigator.clipboard.writeText(passwordModal.password);
+  toast.success('Password copied!');
+};
 
   const fetchVendor = async () => {
     setLoading(true);
@@ -40,10 +106,18 @@ const VendorDetail = () => {
         withCredentials: true
       });
 
-      if (response.data.success) {
-        setVendor(response.data.data.vendor);
-        setAuditLog(response.data.data.auditLog || []);
+    if (response.data.success) {
+      const vendorData = response.data.data.vendor;
+      setVendor(vendorData);
+      setAuditLog(response.data.data.auditLog || []);
+
+      if (vendorData?.adminPasswordAvailable) {
+        await fetchVendorPassword({ silent: true });
+      } else {
+        setPasswordInfo({ value: null, loading: false, available: false });
+        setPasswordError('Password not available. Reset to generate a new one.');
       }
+    }
     } catch (error) {
       toast.error('Failed to load vendor details');
       navigate('/admin/vendors');
@@ -97,8 +171,10 @@ const VendorDetail = () => {
       if (response.data.success) {
         toast.success('Credentials sent successfully');
         if (response.data.temporaryPassword) {
-          // Password will be shown from vendor.adminPassword after refresh
-          fetchVendor();
+        setPasswordInfo({ value: response.data.temporaryPassword, loading: false, available: true });
+        setPasswordError('');
+        setPasswordModal({ open: true, password: response.data.temporaryPassword, context: 'resend' });
+        fetchVendor();
         }
       }
     } catch (error) {
@@ -123,7 +199,11 @@ const VendorDetail = () => {
 
       if (response.data.success) {
         toast.success('Password reset successfully');
-        // Password will be shown from vendor.adminPassword after refresh
+      if (response.data.password) {
+        setPasswordInfo({ value: response.data.password, loading: false, available: true });
+        setPasswordError('');
+        setPasswordModal({ open: true, password: response.data.password, context: 'reset' });
+      }
         fetchVendor();
       }
     } catch (error) {
@@ -141,6 +221,14 @@ const VendorDetail = () => {
       rejected: 'bg-theme-subtle text-theme-secondary'
     };
     return colors[status] || colors.pending;
+  };
+
+  const handleOpenWhatsappModal = async () => {
+    if (!vendor) return;
+    if (vendor.adminPasswordAvailable && !passwordInfo.value && !passwordInfo.loading) {
+      await fetchVendorPassword({ silent: true });
+    }
+    setWhatsappModal(true);
   };
 
   if (loading) {
@@ -177,7 +265,7 @@ const VendorDetail = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Vendor Info */}
+          {/* VENDOR-UI: Vendor Info & Audit Log */}
           <div className="lg:col-span-2 space-y-6">
             <div className="glass-card rounded-2xl p-6">
               <h2 className="text-xl font-bold mb-4" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
@@ -249,99 +337,263 @@ const VendorDetail = () => {
           </div>
 
           {/* Actions */}
-          <div className="space-y-6">
-            <div className="glass-card rounded-2xl p-6">
-              <h2 className="text-xl font-bold mb-4" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
-                Actions
-              </h2>
+          <div className="space-y-5">
+            {/* Stock Request Card */}
+            <div className="glass-card rounded-2xl p-5 border border-theme-base/30 space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">📦</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-theme-primary" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
+                    Stock Request
+                  </h3>
+                  <p className="text-xs text-theme-secondary">Request stock from this vendor</p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate(`/admin/vendors/${id}/requests/new`)}
+                className="w-full px-4 py-2.5 rounded-xl font-semibold text-sm bg-brand-primary text-black hover:bg-brand-primary/90 shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+              >
+                <span>📦</span>
+                <span>Create Stock Request</span>
+              </button>
+            </div>
+            {/* VENDOR-UI: Credentials Management Card */}
+            <div className="glass-card rounded-2xl p-5 border border-theme-base/30 space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🔑</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-theme-primary" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
+                    Credentials Management
+                  </h3>
+                  <p className="text-xs text-theme-secondary">Manage vendor login credentials</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={handleResendCredentials}
+                  disabled={actionLoading.resend}
+                  className={`w-full px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
+                    actionLoading.resend 
+                      ? 'bg-theme-surface/40 text-theme-secondary cursor-not-allowed' 
+                      : 'bg-brand-primary text-black hover:bg-brand-primary/90 shadow-lg hover:shadow-xl'
+                  }`}
+                  title="Send latest password and onboarding email to vendor"
+                >
+                  {actionLoading.resend ? (
+                    <>
+                      <span className="animate-spin h-4 w-4 border-2 border-black border-t-transparent rounded-full"></span>
+                      <span>Sending…</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>📧</span>
+                      <span>Resend Credentials</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResetPassword}
+                  disabled={actionLoading.reset}
+                  className={`w-full px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
+                    actionLoading.reset 
+                      ? 'bg-theme-surface/40 text-theme-secondary cursor-not-allowed' 
+                      : 'bg-theme-surface/70 text-theme-primary hover:bg-theme-surface/90 border border-theme-base/40'
+                  }`}
+                  title="Generate a new admin-controlled password"
+                >
+                  {actionLoading.reset ? (
+                    <>
+                      <span className="animate-spin h-4 w-4 border-2 border-theme-primary border-t-transparent rounded-full"></span>
+                      <span>Resetting…</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>🔄</span>
+                      <span>Reset Password</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={handlePasswordCopy}
+                  disabled={!passwordInfo.value}
+                  className={`w-full px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
+                    !passwordInfo.value
+                      ? 'bg-theme-surface/40 text-theme-secondary cursor-not-allowed'
+                      : 'bg-theme-surface/70 text-theme-primary hover:bg-theme-surface/90 border border-theme-base/40'
+                  }`}
+                  title="Copy vendor password to clipboard"
+                >
+                  <span>📋</span>
+                  <span>Copy Password</span>
+                </button>
+              </div>
+            </div>
+
+            {/* VENDOR-UI: Notifications & Messaging Card */}
+            <div className="glass-card rounded-2xl p-5 border border-theme-base/30 space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">💬</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-theme-primary" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
+                    Notifications & Messaging
+                  </h3>
+                  <p className="text-xs text-theme-secondary">Send messages and manage email preferences</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={handleOpenWhatsappModal}
+                  className="w-full px-4 py-2.5 rounded-xl font-semibold text-sm bg-brand-primary text-black hover:bg-brand-primary/90 shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                  title="Open WhatsApp message templates with auto-filled credentials"
+                >
+                  <span>💬</span>
+                  <span>Send WhatsApp Template</span>
+                </button>
+                <label className="flex items-center gap-3 px-3 py-2 rounded-xl bg-theme-surface/30 hover:bg-theme-surface/50 transition-colors cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={notificationOptions.sendEmail}
+                    onChange={(e) => setNotificationOptions(prev => ({ ...prev, sendEmail: e.target.checked }))}
+                    className="rounded h-4 w-4 text-brand-primary focus:ring-brand-primary border-theme-base bg-theme-surface"
+                  />
+                  <span className="text-sm text-theme-primary">Send email on status change</span>
+                </label>
+                {notificationOptions.rejectionReason && (
+                  <div className="p-3 bg-theme-surface/50 rounded-xl border border-theme-base/30">
+                    <p className="text-xs text-theme-secondary mb-1">Last rejection reason:</p>
+                    <p className="text-sm text-theme-primary">{notificationOptions.rejectionReason}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* VENDOR-UI: Account Controls Card */}
+            <div className="glass-card rounded-2xl p-5 border border-theme-base/30 space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">⚙️</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-theme-primary" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
+                    Account Controls
+                  </h3>
+                  <p className="text-xs text-theme-secondary">Manage vendor account status</p>
+                </div>
+              </div>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Change Status</label>
+                  <label className="block text-xs font-medium text-theme-secondary mb-2">Account Status</label>
                   <select
                     value={vendor.status}
                     onChange={(e) => handleStatusChange(e.target.value)}
                     disabled={actionLoading.status}
-                    className="w-full rounded-xl border border-theme-base bg-theme-surface px-4 py-3 text-theme-primary focus:outline-none focus:ring-2 focus:ring-brand-primary disabled:opacity-50"
+                    className="w-full rounded-xl border border-theme-base/40 bg-theme-surface px-4 py-2.5 text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-brand-primary disabled:opacity-60 transition-all"
+                    title="Update vendor account status"
                   >
                     <option value="pending">Pending</option>
                     <option value="active">Active</option>
                     <option value="suspended">Suspended</option>
                     <option value="rejected">Rejected</option>
                   </select>
+                  <p className="text-xs text-theme-secondary mt-1.5">Change the vendor account status</p>
                 </div>
-
-                {/* Notification Options */}
-                <div className="glass-card rounded-xl p-4 bg-theme-surface/50">
-                  <label className="block text-sm font-medium mb-3 text-theme-primary">Notification Options</label>
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={notificationOptions.sendEmail}
-                        onChange={(e) => setNotificationOptions(prev => ({ ...prev, sendEmail: e.target.checked }))}
-                        className="rounded"
-                      />
-                      <span className="text-sm text-theme-primary">📧 Send Email</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* WhatsApp Templates Button */}
-                <button
-                  onClick={() => setWhatsappModal(true)}
-                  className="w-full px-4 py-3 bg-success text-white rounded-xl font-semibold hover:bg-success/90 transition-colors"
-                >
-                  💬 WhatsApp Templates
-                </button>
-
-                <button
-                  onClick={handleResendCredentials}
-                  disabled={actionLoading.resend}
-                  className="w-full px-4 py-3 bg-brand-primary text-white rounded-xl font-semibold hover:bg-brand-primary-hover transition-colors disabled:opacity-50"
-                >
-                  {actionLoading.resend ? 'Sending...' : 'Resend Credentials'}
-                </button>
-
-                <button
-                  onClick={handleResetPassword}
-                  disabled={actionLoading.reset}
-                  className="w-full px-4 py-3 border border-error text-error rounded-xl font-semibold hover:bg-error/10 transition-colors disabled:opacity-50"
-                >
-                  {actionLoading.reset ? 'Resetting...' : 'Reset Password'}
-                </button>
-
               </div>
             </div>
 
             {/* Password Display */}
-            {vendor?.adminPassword && (
-              <div className="glass-card rounded-2xl p-6 bg-warning/10 border-2 border-warning/30">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-bold text-theme-primary" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
-                    🔑 Vendor Password
-                  </h3>
+            <div className="glass-card rounded-2xl p-6 border border-warning/40 bg-warning/10 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <h3 className="text-lg font-bold text-theme-primary" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
+                  🔑 Vendor Password
+                </h3>
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(vendor.adminPassword);
-                      setCopiedPassword(true);
-                      toast.success('Password copied!');
-                      setTimeout(() => setCopiedPassword(false), 2000);
-                    }}
-                    className="px-3 py-1 text-sm bg-brand-primary text-white rounded-lg hover:bg-brand-primary-hover transition-colors"
+                    onClick={() => fetchVendorPassword()}
+                    disabled={passwordInfo.loading}
+                    className="px-3 py-1 text-sm rounded-lg border border-theme-base/30 bg-theme-surface/40 hover:bg-theme-surface/60 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    title="Refresh password"
                   >
-                    {copiedPassword ? '✓ Copied' : '📋 Copy'}
+                    {passwordInfo.loading ? (
+                      <span className="inline-block h-4 w-4 border-2 border-theme-primary border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      '↻'
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    disabled={!passwordInfo.available || passwordInfo.loading}
+                    className="px-3 py-1 text-sm rounded-lg border border-theme-base/30 bg-theme-surface/40 hover:bg-theme-surface/60 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? '🙈' : '👁️'}
+                  </button>
+                  <button
+                    onClick={handlePasswordCopy}
+                    disabled={!passwordInfo.value}
+                    className="px-3 py-1 text-sm rounded-lg border border-brand-primary/40 bg-brand-primary/20 text-brand-primary hover:bg-brand-primary/30 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    title="Copy password"
+                  >
+                    {copiedPassword ? '✓' : '📋'}
                   </button>
                 </div>
-                <div className="bg-black/30 rounded-lg p-4 mb-3">
-                  <code className="text-lg font-mono font-bold text-theme-primary tracking-wider">
-                    {vendor.adminPassword}
-                  </code>
-                </div>
-                <p className="text-xs text-theme-secondary">
-                  ⚠️ This is the permanent password for this vendor. Save it securely.
-                </p>
               </div>
-            )}
+
+              {passwordInfo.loading ? (
+                <div className="flex items-center gap-3 text-sm text-theme-secondary">
+                  <span className="inline-block h-5 w-5 border-2 border-theme-primary border-t-transparent rounded-full animate-spin" />
+                  <span>Fetching secure password…</span>
+                </div>
+              ) : passwordInfo.available && passwordInfo.value ? (
+                <div>
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={handlePasswordCopy}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        handlePasswordCopy();
+                      }
+                    }}
+                    className="bg-black/30 rounded-lg p-4 mb-2 cursor-pointer hover:bg-black/40 transition-colors"
+                    title="Click to copy password"
+                  >
+                    <code className="text-xl font-mono font-semibold text-theme-primary tracking-wider break-all">
+                      {showPassword ? passwordInfo.value : '•'.repeat(Math.max(passwordInfo.value.length, 6))}
+                    </code>
+                  </div>
+                  {copiedPassword && (
+                    <p className="text-xs text-success mb-1">Copied!</p>
+                  )}
+                  <p className="text-xs text-theme-secondary">
+                    ⚠️ Admin-only password. Reset or resend credentials from the actions above.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-theme-secondary">
+                    {passwordError || 'Password not available. Reset to generate a new one.'}
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                      onClick={() => fetchVendorPassword()}
+                      className="px-4 py-2 rounded-lg bg-theme-surface/40 border border-theme-base/30 text-sm text-theme-primary hover:bg-theme-surface/60 transition-colors"
+                    >
+                      🔄 Try Fetching Again
+                    </button>
+                    <button
+                      onClick={handleResetPassword}
+                      className="px-4 py-2 rounded-lg bg-brand-primary text-black text-sm font-semibold hover:bg-brand-primary/90 transition-colors"
+                    >
+                      🔐 Generate New Password
+                    </button>
+                  </div>
+                  <p className="text-xs text-theme-secondary">
+                    Resetting will create a fresh password and notify the vendor via email.
+                  </p>
+                </div>
+              )}
+            </div>
 
             <div className="glass-card rounded-2xl p-6">
               <h2 className="text-xl font-bold mb-4" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
@@ -364,6 +616,66 @@ const VendorDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* Password Reveal Modal */}
+        {passwordModal.open && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="glass-card rounded-3xl p-8 max-w-lg w-full border border-theme-base/30 space-y-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-theme-primary" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
+                    Admin Password Access
+                  </h2>
+                  <p className="text-sm text-theme-secondary mt-1">
+                    {passwordModal.context === 'reset'
+                      ? 'A new password was generated. Share securely with the vendor.'
+                      : 'Latest vendor password retrieved for reference.'}
+                  </p>
+                </div>
+                <button
+                  onClick={closePasswordModal}
+                  className="text-theme-secondary hover:text-theme-primary transition-colors text-2xl"
+                  aria-label="Close password modal"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-sm text-theme-secondary">Vendor</p>
+                <p className="text-theme-primary font-semibold text-sm sm:text-base">
+                  {vendor.companyName || vendor.displayName}
+                </p>
+                <p className="text-xs text-theme-secondary break-all">{vendor.primaryEmail}</p>
+              </div>
+
+              <div className="bg-black/40 rounded-xl p-5 border border-theme-base/30 text-center">
+                <code className="text-2xl font-mono text-theme-primary tracking-wider break-all">
+                  {passwordModal.password}
+                </code>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={handlePasswordModalCopy}
+                  className="flex-1 px-4 py-3 rounded-xl bg-brand-primary text-black font-semibold hover:bg-brand-primary/90 transition-colors"
+                >
+                  📋 Copy to Clipboard
+                </button>
+                <button
+                  onClick={closePasswordModal}
+                  className="flex-1 px-4 py-3 rounded-xl border border-theme-base/40 text-theme-primary hover:bg-theme-surface/40 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+
+              <p className="text-xs text-theme-secondary">
+                Password visibility is restricted to admins. All access is recorded in the audit log.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* WhatsApp Templates Modal */}
         {whatsappModal && vendor && (
@@ -392,7 +704,7 @@ const VendorDetail = () => {
                   const message = generateTemplateMessage(template.id, {
                     vendorName: vendor.companyName || vendor.displayName,
                     vendorEmail: vendor.primaryEmail,
-                    vendorPassword: vendor.adminPassword || '[Password not available]'
+                    vendorPassword: passwordInfo.value || '[Password not available]'
                   });
                   
                   return (
@@ -429,5 +741,5 @@ const VendorDetail = () => {
   );
 };
 
-export default VendorDetail;
 
+export default VendorDetail;

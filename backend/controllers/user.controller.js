@@ -47,12 +47,11 @@ const generateOTP = () => {
  * 
  * Handles user registration process:
  * 1. Validates input fields (firstname, lastname, email, password)
- * 2. Checks for duplicate email addresses (user and captain models)
- * 3. Hashes password using bcrypt
- * 4. Creates new user record in database
- * 5. Generates JWT authentication token
- * 6. Sends welcome email
- * 7. Returns user data and token
+ * 2. Hashes password using bcrypt
+ * 3. Creates new user record in database
+ * 4. Generates JWT authentication token for user
+ * 5. Sends welcome email
+ * 6. Returns user data and token
  * 
  * @route POST /api/users/register
  * @public
@@ -293,20 +292,6 @@ export const loginUser = async (req, res, next) => {
         // Find user by email (select password field explicitly)
         const user = await UserModel.findOne({ email }).select('+password');
         if (!user) {
-            // Check if email exists in captain model to provide helpful error message (optional)
-            if (CaptainModel) {
-                try {
-                    const captainWithEmail = await CaptainModel.findOne({ email });
-                    if (captainWithEmail) {
-                        return res.status(401).json({
-                            success: false,
-                            message: 'This email is registered as a captain account. Please use the captain login or register as a user with a different email.'
-                        });
-                    }
-                } catch (error) {
-                    // Captain model check failed - continue with normal error
-                }
-            }
             throw new Error("Invalid email or password");
         }
         
@@ -545,20 +530,6 @@ export const sendResetPasswordOtp = async (req, res) => {
         // Find user by email
         const user = await UserModel.findOne({ email: normalizedEmail });
         if (!user) {
-            // Check if email exists in captain model to provide helpful error message (optional)
-            if (CaptainModel) {
-                try {
-                    const captainWithEmail = await CaptainModel.findOne({ email: normalizedEmail });
-                    if (captainWithEmail) {
-                        return res.status(404).json({
-                            success: false,
-                            message: 'This email is registered as a captain account. Please use the captain password reset or register as a user with a different email.'
-                        });
-                    }
-                } catch (error) {
-                    // Captain model check failed - continue with normal error
-                }
-            }
             return res.status(404).json({
                 success: false,
                 message: 'No account found with this email'

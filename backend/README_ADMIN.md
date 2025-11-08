@@ -238,15 +238,20 @@ Cookie: adminToken=<admin-token>
 backend/
   models/
     adminCode.model.js          # Admin code database model
+    settings.model.js           # Site-wide settings singleton (branding, content, theme)
   controllers/
     admin.controller.js         # Admin authentication controllers
+    admin.settings.controller.js# Settings controllers (branding/content/theme)
   services/
     adminCode.service.js        # Code generation and verification
+    settings.service.js         # Settings business logic
   routes/
     admin.route.js              # Admin API routes
+    admin.settings.route.js     # Settings API routes
   middleware/
     adminAuth.middleware.js     # Admin JWT verification
     rateLimitAdmin.js           # Rate limiting middleware
+    uploadAdmin.middleware.js   # Logo/Favicon upload handling
   templates/
     adminEmail.template.js      # Email template
 ```
@@ -523,6 +528,100 @@ frontend/src/pages/admin/system-monitoring/
 - System actions are logged for audit purposes
 - Rate limiting prevents abuse of maintenance endpoints
 - Auto-refresh can be toggled on/off by the admin
+
+---
+
+## ⚙️ Admin Settings Module (Branding, Content, Theme, Preview)
+
+### Tab Hierarchy
+
+- Dashboard
+- Settings
+  - Branding
+  - Content
+  - Theme
+  - Preview
+- System Monitoring
+- Vendors
+
+### Branding
+
+- Upload/replace/delete Site Logo (PNG, JPG, SVG ≤ 2MB). Drag & drop or click to select.
+- Upload/replace/delete Favicon (ICO or PNG ≤ 500KB). Includes live `<head>` favicon refresh on success.
+- Previews use `URL.createObjectURL` for instant feedback before the request completes.
+- Upload pipeline: `PUT /api/admin/settings/branding` (multipart) → validated file → stored under `backend/public/uploads/branding/{logo|favicon}` with timestamped filenames → response returns relative URL for live preview.
+- Delete operations send `{ deleteLogo: true }` or `{ deleteFavicon: true }` in a JSON payload to the same endpoint.
+- Error states surface toast notifications; no changes persist on failure.
+
+### Content
+
+- Fields: Hero Title, Subheading, Main Heading, CTA Text (with character counters & helper tips).
+- Changes update the preview frame instantly without hitting the backend; use **Update Preview** to refresh the preview state and **Publish** (Preview tab) to persist.
+- Reset to defaults is available; validation is advisory only.
+
+### Theme
+
+- Dual palettes (`lightTheme`, `darkTheme`) with editable keys: `primary`, `secondary`, `background`, `surface`, `text`, `button`.
+- Instant preview toggle applies selections to the preview frame via CSS variables—no blocking even if contrast is low (a "Low contrast" hint is shown only).
+- **Save Changes** writes updates via `PUT /api/admin/settings/theme` using `{ lightTheme, darkTheme, activeThemeMode }`; the Preview tab can still publish the entire configuration to live environments.
+- Colors apply immediately to the preview pane so admins can iterate quickly.
+
+### Preview
+
+- Condensed hero mock rendering current logo, headline, tagline, CTA, and palette.
+- Light/Dark toggle mirrors the Theme tab selection and updates immediately when other tabs modify settings.
+- Publish aggregates Branding + Content + Theme payloads and applies them live in one action.
+
+### Vendor Password Visibility & Audit Trail
+
+- Admin-only password retrieval endpoint: `GET /api/admin/vendors/:id/password`.
+  - Requires admin JWT + rate limit (`vendor_password` scope, 1 request/2 minutes per admin).
+  - Decrypts stored `adminPasswordEncrypted` or falls back to audit log history; response returns plaintext temporarily for the admin.
+  - Audit entry recorded as `password_viewed` with masked password tail, admin email, IP, user agent, and method (`encrypted_store` or `audit:password_generated`).
+- Password reset: `POST /api/admin/vendors/:id/reset-password` generates a new secure password, sends email to vendor, returns plaintext once in response, and logs `password_reset` action.
+- Password resend: `POST /api/admin/vendors/:id/resend-credentials` reissues last password and logs `credentials_sent`.
+- Admin UI
+  - Vendor list: Eye toggle fetches password on demand, click-to-copy shows toast, actions column uses glass cards with alignment fixes.
+  - Vendor detail: Secure box with reveal/copy buttons, password modal on reset/resend.
+- All password views/resets hydrate the cached preview so WhatsApp templates and copy buttons never display stale values.
+
+### WhatsApp Templates (Copy-Only)
+
+- No automatic WhatsApp sending. All previous WhatsApp services were removed (`backend/services/whatsapp.service.js`, etc.).
+- Templates live in `frontend/src/utils/whatsappTemplates.js` and populate modals in Vendors List/Detail.
+- Admin flow:
+  1. Open the 💬 modal from the vendor actions card.
+  2. Review templates filled with {vendor name, email, latest password}.
+  3. Click **Copy** to send via WhatsApp manually (web/app).
+- Copy usage is logged as `whatsapp_template_copied` in audit when implemented.
+
+### API Overview
+
+- GET `/api/admin/settings` — Fetch current settings (public for theme consumption)
+- PUT `/api/admin/settings/branding` — Update logo/favicon/siteName (multipart or JSON)
+- PUT `/api/admin/settings/content` — Update heroHeadline/heroTagline/primaryHeading
+- PUT `/api/admin/settings/theme` — Update theme (`{ lightTheme, darkTheme, activeThemeMode }`)
+- POST `/api/admin/settings/theme/reset` — Reset to brand defaults
+
+### QA Test Checklist
+
+- **Password Endpoints**
+  - `GET /api/admin/vendors/:id/password` (auth, rate-limit headers, audit log entry).
+  - `POST /api/admin/vendors/:id/reset-password` (email send, response includes plaintext once, audit log).
+- **Uploads**
+  - Logo upload (PNG/JPG/SVG ≤ 2MB) → preview, persisted URL, delete flow.
+  - Favicon upload (ICO/PNG ≤ 500KB) → `<head>` favicon updates, delete flow fallback icon restored.
+- **Theme Save & Preview**
+  - Light/Dark palette edits update preview instantly.
+  - `Update Preview` no-ops without changes; `Publish` stores both palettes.
+  - Low-contrast hint appears but does not block save.
+- **WhatsApp Templates**
+  - Modal opens, copy button includes latest email/password placeholders.
+- **Vendor Actions Layout**
+  - Responsive row actions (glass cards) maintain alignment on desktop/tablet/mobile.
+  - Password reveal/copy toasts show and dismiss correctly.
+- **Preview Module**
+  - Light/Dark toggle applies CSS vars; hero preview reflects latest branding/content/theme without full page reload.
 
 ---
 

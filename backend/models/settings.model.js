@@ -50,9 +50,33 @@ const settingsSchema = new mongoose.Schema({
   // Theme Settings (stored as JSON object)
   theme: {
     primary: { type: String, default: '#E43636' },
+    secondary: { type: String, default: '#E2DDB4' },
     background: { type: String, default: '#F6EFD2' },
     surface: { type: String, default: '#E2DDB4' },
-    text: { type: String, default: '#000000' }
+    text: { type: String, default: '#000000' },
+    button: { type: String, default: '#E43636' }
+  },
+  // Advanced Theme Palettes
+  themeLight: {
+    primary: { type: String, default: '#E43636' },
+    secondary: { type: String, default: '#E2DDB4' },
+    background: { type: String, default: '#F6EFD2' },
+    surface: { type: String, default: '#FFFFFF' },
+    text: { type: String, default: '#000000' },
+    button: { type: String, default: '#E43636' }
+  },
+  themeDark: {
+    primary: { type: String, default: '#E43636' },
+    secondary: { type: String, default: '#2B2B2B' },
+    background: { type: String, default: '#000000' },
+    surface: { type: String, default: '#1A1A1A' },
+    text: { type: String, default: '#F6EFD2' },
+    button: { type: String, default: '#E43636' }
+  },
+  activeThemeMode: {
+    type: String,
+    enum: ['light', 'dark'],
+    default: 'light'
   },
   
   // Metadata

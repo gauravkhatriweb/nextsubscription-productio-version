@@ -30,6 +30,23 @@ import {
   uploadAccounts
 } from '../controllers/vendor.product.controller.js';
 import {
+  createProductRequest,
+  getProductRequests,
+  getProductRequestById,
+  uploadProductRequestFiles
+} from '../controllers/vendor.productRequest.controller.js';
+import {
+  getAdminRequests,
+  getAdminRequestById,
+  fulfillAdminRequest,
+  rejectAdminRequest
+} from '../controllers/vendor.adminRequest.controller.js';
+import {
+  uploadCredentials,
+  getCredentials,
+  uploadCredentialFiles
+} from '../controllers/vendor.productCredential.controller.js';
+import {
   getOrders,
   getOrderById,
   fulfillOrder
@@ -96,6 +113,22 @@ router.post('/products', verifyVendorJWT, rateLimitVendorAPI, createProduct);
 router.put('/products/:id', verifyVendorJWT, rateLimitVendorAPI, updateProduct);
 router.delete('/products/:id', verifyVendorJWT, rateLimitVendorAPI, deleteProduct);
 router.post('/products/:id/upload-accounts', verifyVendorJWT, rateLimitFileUpload, uploadAccounts);
+
+// Product Request Routes (rate limited)
+router.post('/products/requests', verifyVendorJWT, rateLimitVendorAPI, uploadProductRequestFiles, createProductRequest);
+router.get('/products/requests', verifyVendorJWT, rateLimitVendorAPI, getProductRequests);
+router.get('/products/requests/:id', verifyVendorJWT, rateLimitVendorAPI, getProductRequestById);
+
+// Product Credential Routes (rate limited)
+router.post('/products/:id/credentials', verifyVendorJWT, rateLimitFileUpload, uploadCredentialFiles, uploadCredentials);
+router.get('/products/:id/credentials', verifyVendorJWT, rateLimitVendorAPI, getCredentials);
+
+// Admin Request Routes (rate limited)
+router.get('/admin-requests', verifyVendorJWT, rateLimitVendorAPI, getAdminRequests);
+router.get('/admin-requests/:id', verifyVendorJWT, rateLimitVendorAPI, getAdminRequestById);
+router.get('/admin-requests/:id/fulfill', verifyVendorJWT, rateLimitVendorAPI, fulfillAdminRequest);
+router.post('/requests/:requestId/fulfill', verifyVendorJWT, rateLimitFileUpload, uploadCredentialFiles, uploadCredentials);
+router.post('/admin-requests/:id/reject', verifyVendorJWT, rateLimitVendorAPI, rejectAdminRequest);
 
 // Order Routes (rate limited)
 router.get('/orders', verifyVendorJWT, rateLimitVendorAPI, getOrders);

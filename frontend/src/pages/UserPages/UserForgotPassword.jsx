@@ -27,6 +27,7 @@ import React, { useState } from 'react'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { useNavigate, Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import logo from '../../assets/branding/nextsubscription_main_logo.png'
 
 /**
@@ -39,7 +40,30 @@ import logo from '../../assets/branding/nextsubscription_main_logo.png'
 const UserForgotPassword = () => {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
   const navigate = useNavigate()
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.3
+      }
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -70,121 +94,148 @@ const UserForgotPassword = () => {
       })
 
       if (response.data.success) {
-        toast.success('Password reset OTP sent to your email')
-        // Navigate to reset password page with email in state
-        navigate('/user/reset-password', { state: { email: email.trim().toLowerCase() } })
+        // Show success animation
+        setIsSuccess(true)
+        toast.success('✅ Email sent. Check your inbox.')
+        
+        // Navigate to reset password page with email in state after a short delay
+        setTimeout(() => {
+          navigate('/user/reset-password', { state: { email: email.trim().toLowerCase() } })
+        }, 1500)
       }
     } catch (err) {
       console.error('Password reset request error:', err)
       const message = err?.response?.data?.message || 'Failed to send reset OTP. Please try again.'
       toast.error(message)
-    } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className='relative min-h-screen w-full bg-theme-background text-theme-primary overflow-hidden'>
+    <div className='relative min-h-screen w-full bg-[var(--theme-background)] text-[var(--theme-text)] overflow-hidden'>
       {/* Ambient gradient orbs following brand guidelines */}
-      <div className='pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-primary blur-3xl opacity-30' />
-      <div className='pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-gradient-secondary blur-3xl opacity-25' />
+      <div className='pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-[var(--theme-primary)]/20 via-[var(--theme-secondary)]/10 to-[var(--theme-accent)]/10 blur-3xl opacity-40' />
+      <div className='pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-[var(--theme-primary)]/15 via-[var(--theme-secondary)]/10 to-[var(--theme-accent)]/10 blur-3xl opacity-30' />
       
       <main className='relative z-10 flex min-h-screen items-center justify-center px-6'>
         <section className='w-full max-w-md'>
-          {/* Logo following brand guidelines */}
-          <div className='mb-6 flex items-center justify-center'>
-            <div className='inline-flex items-center justify-center rounded-2xl p-[2px] bg-gradient-primary'>
-              <div className='rounded-2xl bg-theme-background p-3'>
+          {/* Animated logo */}
+          <motion.div 
+            className='mb-8 flex items-center justify-center'
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className='inline-flex items-center justify-center rounded-2xl p-[2px] bg-gradient-to-r from-[var(--theme-primary)] via-[var(--theme-accent)] to-[var(--theme-secondary)]'>
+              <div className='rounded-2xl bg-[var(--theme-background)] p-3'>
                 <img src={logo} alt='Next Subscription logo' className='h-9 w-9' />
               </div>
             </div>
-          </div>
+          </motion.div>
           
-          <div className='rounded-2xl glass-border glass-bg p-6 sm:p-8 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.35)]'>
-            <div className='text-center'>
-              <h1 className='text-2xl sm:text-3xl font-bold tracking-tight' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
-                Reset your password
+          <motion.div 
+            className='rounded-3xl p-8 sm:p-10 backdrop-blur-md border border-[var(--theme-glass-border)] bg-[var(--theme-glass-background)] shadow-[var(--theme-glass-shadow)]'
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div 
+              className='text-center mb-8'
+              variants={itemVariants}
+            >
+              <h1 className='text-3xl sm:text-4xl font-bold tracking-tight text-[var(--theme-text)] mb-3' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
+                Forgot Your Password?
               </h1>
-              <p className='mt-2 text-sm text-theme-secondary' style={{ fontFamily: 'Inter, system-ui' }}>
-                Enter your email address and we'll send you a code to reset your password.
+              <p className='text-base text-[var(--theme-text-secondary)]'>
+                Enter your registered email and we'll send you a secure code.
               </p>
-            </div>
+            </motion.div>
             
-            <form onSubmit={handleSubmit} className='mt-8 space-y-6'>
-              <div>
-                <label htmlFor='email' className='block text-sm font-medium mb-2' style={{ fontFamily: 'Inter, system-ui' }}>
-                  Email Address
+            <motion.form 
+              onSubmit={handleSubmit} 
+              className='mt-6 space-y-5'
+              variants={containerVariants}
+            >
+              <motion.div variants={itemVariants}>
+                <label htmlFor='email' className='block text-sm font-medium mb-2 text-[var(--theme-text)]'>
+                  Email
                 </label>
-                <input
-                  id='email'
-                  name='email'
-                  type='email'
-                  autoComplete='email'
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder='Enter your email address'
-                  className='block w-full rounded-lg glass-border bg-theme-surface px-4 py-3 text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent transition-all duration-200'
-                  style={{ fontFamily: 'Inter, system-ui' }}
-                />
-              </div>
+                <div className='relative'>
+                  <span className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--theme-text-subtle)]'>
+                    {/* mail icon */}
+                    <svg width='18' height='18' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                      <path d='M4 6.5C4 5.67157 4.67157 5 5.5 5H18.5C19.3284 5 20 5.67157 20 6.5V17.5C20 18.3284 19.3284 19 18.5 19H5.5C4.67157 19 4 18.3284 4 17.5V6.5Z' stroke='currentColor' strokeWidth='1.5'/>
+                      <path d='M5 7L12 12L19 7' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'/>
+                    </svg>
+                  </span>
+                  <input
+                    id='email'
+                    name='email'
+                    type='email'
+                    autoComplete='email'
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder='you@example.com'
+                    className='w-full rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] pl-10 pr-4 py-3.5 text-sm text-[var(--theme-text)] placeholder-[var(--theme-text-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] focus:border-transparent transition-all duration-200'
+                  />
+                </div>
+              </motion.div>
               
-              <button
-                type='submit'
-                disabled={loading}
-                className={`inline-flex w-full items-center justify-center rounded-full px-6 py-3 text-sm sm:text-base font-bold text-theme-primary shadow-[0_8px_30px_rgb(0,0,0,0.35)] glass-border transition-[transform,background-color,opacity] duration-200 hover:scale-[1.01] active:scale-[0.99] ${
-                  loading
-                    ? 'bg-gray-600 opacity-50 cursor-not-allowed'
-                    : 'bg-brand-primary hover:brightness-110'
-                }`}
-                style={{ fontFamily: 'Inter, system-ui' }}
+              <motion.div variants={itemVariants}>
+                <button
+                  type='submit'
+                  disabled={loading || isSuccess}
+                  className={`w-full inline-flex items-center justify-center rounded-full px-8 py-4 text-base font-semibold text-white shadow-[var(--theme-shadow-brand)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)]/50 focus:ring-offset-2 ${
+                    loading || isSuccess 
+                      ? 'bg-[var(--theme-primary)]/70 opacity-75 cursor-not-allowed' 
+                      : 'bg-[var(--theme-primary)] hover:bg-[var(--theme-primary)] hover:scale-[1.03] hover:shadow-[0_8px_25px_rgba(228,54,54,0.4)]'
+                  }`}
+                >
+                  {isSuccess ? (
+                    <div className='flex items-center'>
+                      <svg className='w-5 h-5 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M5 13l4 4L19 7'></path>
+                      </svg>
+                      Success!
+                    </div>
+                  ) : loading ? (
+                    <div className='flex items-center'>
+                      <svg className='animate-spin -ml-1 mr-2 h-4 w-4 text-white' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
+                        <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
+                        <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
+                      </svg>
+                      Sending…
+                    </div>
+                  ) : (
+                    'Send Verification Code'
+                  )}
+                </button>
+              </motion.div>
+              
+              <motion.div 
+                className='text-center text-sm text-[var(--theme-text-secondary)]'
+                variants={itemVariants}
               >
-                {loading ? (
-                  <>
-                    <svg className='animate-spin -ml-1 mr-2 h-4 w-4 text-theme-primary' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
-                      <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
-                      <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
-                    </svg>
-                    Sending…
-                  </>
-                ) : (
-                  <>
-                    <svg className='w-4 h-4 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' />
-                    </svg>
-                    Send Reset Code
-                  </>
-                )}
-              </button>
-              
-              {/* Additional info */}
-              <div className='text-center'>
-                <p className='text-xs text-theme-muted' style={{ fontFamily: 'Inter, system-ui' }}>
-                  💡 Check your spam folder if you don't receive the email within a few minutes
-                </p>
-              </div>
-            </form>
-          </div>
+                <p>💡 Check your spam folder if you don't receive the email within a few minutes</p>
+              </motion.div>
+            </motion.form>
+          </motion.div>
           
           {/* Navigation help */}
-          <div className='mt-6 text-center space-y-2'>
+          <motion.div 
+            className='mt-6 text-center'
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
             <Link
               to='/user/login'
-              className='block text-xs text-theme-muted hover:text-theme-primary transition-colors'
-              style={{ fontFamily: 'Inter, system-ui' }}
+              className='text-sm text-[var(--theme-text-secondary)] hover:text-[var(--theme-primary)] transition-colors duration-200'
             >
               ← Back to Login
             </Link>
-            <div className='text-xs text-theme-muted' style={{ fontFamily: 'Inter, system-ui' }}>
-              Don't have an account?{' '}
-              <Link
-                to='/user/register'
-                className='text-brand-primary hover:text-brand-secondary transition-colors'
-              >
-                Sign up
-              </Link>
-            </div>
-          </div>
+          </motion.div>
         </section>
       </main>
     </div>

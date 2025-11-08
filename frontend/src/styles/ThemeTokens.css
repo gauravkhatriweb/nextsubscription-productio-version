@@ -10,6 +10,8 @@
   --brand-accent: #E2DDB4;
   --brand-neutral-dark: #000000;
   --brand-pure-white: #FFFFFF;
+  --button-bg: #E43636;
+  --button-text: #FFFFFF;
   
   /* Dark Theme Base Colors - Deep & Luxurious */
   --bg-dark: #000000;
@@ -256,6 +258,31 @@
 /* Smooth Transitions */
 .transition-theme {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Text Contrast Helpers (non-blocking) */
+.text-auto-contrast {
+  color: var(--text-primary);
+}
+.text-on-brand {
+  color: #000000; /* Ensure readability on brand primary */
+}
+
+/* Truncation Utilities */
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Button Size Utilities */
+.btn-compact {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+}
+.btn-standard {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
 }
 
 /* Status Color Utility Classes */

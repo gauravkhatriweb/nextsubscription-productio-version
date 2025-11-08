@@ -62,7 +62,7 @@
 
 @keyframes pulse-pickup {
   0% {
-    box-shadow: 0 0 0 0 rgba(77, 166, 255, 0.7);
+    box-shadow: 0 0 0 0 var(--theme-info-light);
   }
   70% {
     box-shadow: 0 0 0 10px rgba(77, 166, 255, 0);
@@ -74,7 +74,7 @@
 
 @keyframes pulse-drop {
   0% {
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    box-shadow: 0 0 0 0 var(--theme-error-light);
   }
   70% {
     box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
@@ -113,10 +113,10 @@
   transition: filter 300ms;
 }
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em var(--theme-info));
 }
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 2em var(--theme-info));
 }
 
 @keyframes logo-spin {
@@ -139,5 +139,5 @@
 }
 
 .read-the-docs {
-  color: #888;
+  color: var(--theme-text-subtle);
 }

@@ -41,12 +41,8 @@ const VendorLogin = () => {
 
       if (response.data.success) {
         toast.success('Login successful!');
-        // Check if first login (needs password change)
-        if (response.data.requiresPasswordChange) {
-          navigate('/vendor/setup');
-        } else {
-          navigate('/vendor/dashboard');
-        }
+        // CLEANUP: Removed setup redirect - vendors go directly to dashboard
+        navigate('/vendor/dashboard');
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');

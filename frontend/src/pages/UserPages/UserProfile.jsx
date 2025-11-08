@@ -470,7 +470,7 @@ const UserProfile = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className='rounded-2xl glass-border bg-theme-background/95 backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.35)] overflow-hidden'
+            className='rounded-2xl glass-border bg-theme-background/95 backdrop-blur-md shadow-[0_8px_30px_var(--theme-shadow-brand)] overflow-hidden'
           >
             {/* Profile Header */}
             <div className='px-6 py-6 border-b glass-border bg-gradient-to-r from-brand-primary/10 via-brand-secondary/10 to-brand-tertiary/10'>

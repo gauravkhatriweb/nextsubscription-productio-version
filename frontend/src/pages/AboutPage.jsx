@@ -113,11 +113,11 @@ const AboutPage = () => {
   ]
 
   return (
-    <div className='relative min-h-screen w-full bg-[#000000] text-white overflow-hidden'>
+    <div className='relative min-h-screen w-full bg-[var(--theme-background)] text-[var(--theme-text)] overflow-hidden'>
       {/* Ambient gradient orbs following brand guidelines */}
-      <div className='pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-[#E43636] via-[#F6EFD2] to-[#E2DDB4] blur-3xl opacity-30' />
-      <div className='pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-[#E2DDB4] via-[#E43636] to-[#F6EFD2] blur-3xl opacity-25' />
-      <div className='pointer-events-none absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-gradient-to-br from-[#F6EFD2]/10 via-[#E2DDB4]/10 to-[#E43636]/10 blur-3xl opacity-40' />
+      <div className='pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-[var(--theme-primary)]/20 via-[var(--theme-secondary)]/10 to-[var(--theme-accent)]/10 blur-3xl opacity-40' />
+      <div className='pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-[var(--theme-primary)]/15 via-[var(--theme-secondary)]/10 to-[var(--theme-accent)]/10 blur-3xl opacity-30' />
+      <div className='pointer-events-none absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-gradient-to-br from-[var(--theme-accent)]/10 via-[var(--theme-secondary)]/10 to-[var(--theme-primary)]/10 blur-3xl opacity-20' />
 
       <main className='relative z-10 mx-auto max-w-6xl px-6 py-12 sm:py-16'>
         
@@ -130,7 +130,7 @@ const AboutPage = () => {
         >
           <Link 
             to='/' 
-            className='inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors'
+            className='inline-flex items-center gap-2 text-sm text-[var(--theme-text-subtle)] hover:text-[var(--theme-text)] transition-colors'
             style={{ fontFamily: 'Inter, system-ui' }}
           >
             <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -147,17 +147,17 @@ const AboutPage = () => {
           transition={{ duration: 0.8 }}
           className='text-center mb-20'
         >
-          <div className='mx-auto mb-8 inline-flex items-center justify-center rounded-2xl p-[2px] bg-gradient-to-r from-[#E43636] via-[#F6EFD2] to-[#E2DDB4]'>
-            <div className='rounded-2xl bg-[#000000] p-4'>
+          <div className='mx-auto mb-8 inline-flex items-center justify-center rounded-2xl p-[2px] bg-gradient-to-r from-[var(--theme-primary)] via-[var(--theme-accent)] to-[var(--theme-secondary)]'>
+            <div className='rounded-2xl bg-[var(--theme-background)] p-4'>
               <img src={logo} alt='Next Subscription logo' className='h-16 w-16' />
             </div>
           </div>
           
           <h1 className='text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-6' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
-            About <span className='bg-gradient-to-r from-[#E43636] via-[#F6EFD2] to-[#E2DDB4] bg-clip-text text-transparent'>Next Subscription</span>
+            About <span className='bg-gradient-to-r from-[var(--theme-primary)] via-[var(--theme-accent)] to-[var(--theme-secondary)] bg-clip-text text-transparent'>Next Subscription</span>
           </h1>
           
-          <p className='text-lg sm:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed' style={{ fontFamily: 'Inter, system-ui' }}>
+          <p className='text-lg sm:text-xl text-[var(--theme-text-secondary)] max-w-4xl mx-auto leading-relaxed' style={{ fontFamily: 'Inter, system-ui' }}>
             Next Subscription is Pakistan's homegrown subscription management platform, built to make subscription tracking safer, more affordable, and accessible for everyone.
           </p>
         </motion.section>
@@ -172,13 +172,13 @@ const AboutPage = () => {
         >
           <motion.div 
             variants={itemVariants}
-            className='rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-8 shadow-[0_8px_30px_rgba(0,0,0,0.25)]'
+            className='rounded-2xl border border-[var(--theme-glass-border)] bg-[var(--theme-glass-background)] backdrop-blur-md p-8 shadow-[var(--theme-glass-shadow)]'
           >
             <div className='mb-4'>
               <span className='text-3xl'>🎯</span>
             </div>
-            <h2 className='text-2xl font-bold mb-4' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>Our Mission</h2>
-            <p className='text-gray-300 leading-relaxed' style={{ fontFamily: 'Inter, system-ui' }}>
+            <h2 className='text-2xl font-bold mb-4 text-[var(--theme-text)]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>Our Mission</h2>
+            <p className='text-[var(--theme-text-secondary)] leading-relaxed' style={{ fontFamily: 'Inter, system-ui' }}>
               We exist to revolutionize Pakistan's subscription landscape by providing affordable, secure, and accessible subscription management for everyone. 
               Our platform empowers both subscribers and providers, creating opportunities and ensuring security for all.
             </p>
@@ -186,13 +186,13 @@ const AboutPage = () => {
 
           <motion.div 
             variants={itemVariants}
-            className='rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-8 shadow-[0_8px_30px_rgba(0,0,0,0.25)]'
+            className='rounded-2xl border border-[var(--theme-glass-border)] bg-[var(--theme-glass-background)] backdrop-blur-md p-8 shadow-[var(--theme-glass-shadow)]'
           >
             <div className='mb-4'>
               <span className='text-3xl'>🚀</span>
             </div>
-            <h2 className='text-2xl font-bold mb-4' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>Our Vision</h2>
-            <p className='text-gray-300 leading-relaxed' style={{ fontFamily: 'Inter, system-ui' }}>
+            <h2 className='text-2xl font-bold mb-4 text-[var(--theme-text)]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>Our Vision</h2>
+            <p className='text-[var(--theme-text-secondary)] leading-relaxed' style={{ fontFamily: 'Inter, system-ui' }}>
               We envision a future where subscription management is seamless and inclusive, empowering subscribers and providers alike. 
               Our goal is to connect every Pakistani with reliable, secure, and affordable subscription management, making it a bridge 
               to opportunities rather than a barrier.
@@ -208,36 +208,32 @@ const AboutPage = () => {
           viewport={{ once: true, amount: 0.2 }}
           className='mb-20'
         >
-          <motion.div variants={itemVariants} className='text-center mb-12'>
-            <h2 className='text-3xl sm:text-4xl font-bold mb-4' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
-              Our Core Values
-            </h2>
-            <p className='text-gray-300 max-w-2xl mx-auto' style={{ fontFamily: 'Inter, system-ui' }}>
-              The principles that guide everything we do at Next Subscription
+          <motion.div 
+            variants={itemVariants}
+            className='text-center mb-12'
+          >
+            <h2 className='text-2xl sm:text-3xl font-bold mb-4 text-[var(--theme-text)]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>Our Core Values</h2>
+            <p className='text-[var(--theme-text-secondary)] max-w-2xl mx-auto' style={{ fontFamily: 'Inter, system-ui' }}>
+              These principles guide everything we do at Next Subscription
             </p>
           </motion.div>
-
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+          
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             {values.map((value, index) => (
               <motion.div
                 key={index}
                 variants={itemVariants}
-                whileHover={{ scale: 1.02 }}
-                className='rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6 shadow-[0_8px_30px_rgba(0,0,0,0.25)] text-center'
+                className='rounded-2xl border border-[var(--theme-glass-border)] bg-[var(--theme-glass-background)] backdrop-blur-md p-6 shadow-[var(--theme-glass-shadow)] hover:shadow-[var(--theme-shadow-medium)] transition-shadow duration-300'
               >
-                <div className='text-4xl mb-4'>{value.icon}</div>
-                <h3 className='text-lg font-semibold mb-3' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
-                  {value.title}
-                </h3>
-                <p className='text-sm text-gray-300 leading-relaxed' style={{ fontFamily: 'Inter, system-ui' }}>
-                  {value.description}
-                </p>
+                <div className='text-3xl mb-4'>{value.icon}</div>
+                <h3 className='text-xl font-bold mb-2 text-[var(--theme-text)]'>{value.title}</h3>
+                <p className='text-[var(--theme-text-secondary)]'>{value.description}</p>
               </motion.div>
             ))}
           </div>
         </motion.section>
 
-        {/* Our Story */}
+        {/* Company Story */}
         <motion.section
           variants={containerVariants}
           initial='hidden'
@@ -247,35 +243,42 @@ const AboutPage = () => {
         >
           <motion.div 
             variants={itemVariants}
-            className='rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-md p-8 sm:p-12 shadow-[0_8px_30px_rgba(0,0,0,0.25)]'
+            className='rounded-2xl border border-[var(--theme-glass-border)] bg-[var(--theme-glass-background)] backdrop-blur-md p-8 shadow-[var(--theme-glass-shadow)]'
           >
-            <div className='flex items-center gap-3 mb-6'>
-              <span className='text-3xl'>📖</span>
-              <h2 className='text-3xl font-bold' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>Our Story</h2>
-            </div>
-            
-            <div className='prose prose-lg prose-invert max-w-none'>
-              <p className='text-gray-300 leading-relaxed mb-6' style={{ fontFamily: 'Inter, system-ui' }}>
-                We noticed Pakistan needed a safer, more affordable alternative to international subscription management apps. 
-                Born from the vision to create a truly Pakistani solution, Next Subscription was designed specifically for 
-                our users' needs – understanding our culture, our challenges, and our aspirations.
-              </p>
-              
-              <p className='text-gray-300 leading-relaxed mb-6' style={{ fontFamily: 'Inter, system-ui' }}>
-                Starting as a local initiative, we've grown into Pakistan's premier homegrown subscription management platform. 
-                We're not just another app – we're a movement towards safer, more affordable subscription management that 
-                puts Pakistani subscribers and providers first.
-              </p>
-              
-              <p className='text-gray-300 leading-relaxed' style={{ fontFamily: 'Inter, system-ui' }}>
-                Every subscription on Next Subscription represents our commitment to building a better Pakistan, one service at a time. 
-                We're proud to be Pakistani, and we're proud to serve Pakistan.
-              </p>
+            <div className='flex flex-col md:flex-row gap-8 items-center'>
+              <div className='md:w-1/3'>
+                <div className='rounded-2xl overflow-hidden border border-[var(--theme-glass-border)] shadow-[var(--theme-glass-shadow)]'>
+                  <img 
+                    src={devImage} 
+                    alt='Next Subscription Founder' 
+                    className='w-full h-auto object-cover'
+                  />
+                </div>
+              </div>
+              <div className='md:w-2/3'>
+                <h2 className='text-2xl sm:text-3xl font-bold mb-4 text-[var(--theme-text)]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>Our Story</h2>
+                <div className='space-y-4 text-[var(--theme-text-secondary)]' style={{ fontFamily: 'Inter, system-ui' }}>
+                  <p>
+                    Next Subscription was born out of a simple frustration: managing multiple subscriptions across Pakistan 
+                    was unnecessarily complex and expensive. Our founder, while juggling various digital services, realized 
+                    there was a gap in the market for a localized, user-centric subscription management platform.
+                  </p>
+                  <p>
+                    Starting from a small apartment in Karachi, we've grown into Pakistan's leading subscription management 
+                    platform. Our journey has been fueled by a commitment to affordability, security, and accessibility - 
+                    values that remain at the core of everything we do.
+                  </p>
+                  <p>
+                    Today, we're proud to serve thousands of subscribers and providers across Pakistan, making subscription 
+                    management not just easier, but more empowering for everyone involved.
+                  </p>
+                </div>
+              </div>
             </div>
           </motion.div>
         </motion.section>
 
-        {/* For Subscribers & Providers */}
+        {/* Features for Subscribers and Providers */}
         <motion.section
           variants={containerVariants}
           initial='hidden'
@@ -283,50 +286,51 @@ const AboutPage = () => {
           viewport={{ once: true, amount: 0.2 }}
           className='mb-20'
         >
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-12'>
-            
-            {/* For Subscribers */}
-            <motion.div variants={itemVariants}>
-              <div className='flex items-center gap-3 mb-6'>
-                <span className='text-3xl'>👥</span>
-                <h2 className='text-2xl font-bold' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>For Subscribers</h2>
-              </div>
-              
+          <motion.div 
+            variants={itemVariants}
+            className='text-center mb-12'
+          >
+            <h2 className='text-2xl sm:text-3xl font-bold mb-4 text-[var(--theme-text)]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>Powerful Features</h2>
+            <p className='text-[var(--theme-text-secondary)] max-w-2xl mx-auto' style={{ fontFamily: 'Inter, system-ui' }}>
+              Designed to make subscription management effortless for everyone
+            </p>
+          </motion.div>
+          
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
+            <motion.div
+              variants={itemVariants}
+              className='rounded-2xl border border-[var(--theme-glass-border)] bg-[var(--theme-glass-background)] backdrop-blur-md p-8 shadow-[var(--theme-glass-shadow)]'
+            >
+              <h3 className='text-xl font-bold mb-6 text-[var(--theme-text)] flex items-center'>
+                <span className='mr-3'>👤</span> For Subscribers
+              </h3>
               <div className='space-y-4'>
                 {subscriberFeatures.map((feature, index) => (
-                  <div key={index} className='flex items-start gap-4 p-4 rounded-xl bg-white/5 border border-white/10'>
-                    <span className='text-2xl flex-shrink-0'>{feature.icon}</span>
+                  <div key={index} className='flex items-start'>
+                    <span className='text-xl mr-3 mt-0.5'>{feature.icon}</span>
                     <div>
-                      <h3 className='font-semibold mb-1' style={{ fontFamily: 'Inter, system-ui' }}>
-                        {feature.title}
-                      </h3>
-                      <p className='text-sm text-gray-300' style={{ fontFamily: 'Inter, system-ui' }}>
-                        {feature.description}
-                      </p>
+                      <h4 className='font-semibold text-[var(--theme-text)]'>{feature.title}</h4>
+                      <p className='text-[var(--theme-text-secondary)] text-sm'>{feature.description}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </motion.div>
-
-            {/* For Providers */}
-            <motion.div variants={itemVariants}>
-              <div className='flex items-center gap-3 mb-6'>
-                <span className='text-3xl'>🚗</span>
-                <h2 className='text-2xl font-bold' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>For Providers</h2>
-              </div>
-              
+            
+            <motion.div
+              variants={itemVariants}
+              className='rounded-2xl border border-[var(--theme-glass-border)] bg-[var(--theme-glass-background)] backdrop-blur-md p-8 shadow-[var(--theme-glass-shadow)]'
+            >
+              <h3 className='text-xl font-bold mb-6 text-[var(--theme-text)] flex items-center'>
+                <span className='mr-3'>🏪</span> For Providers
+              </h3>
               <div className='space-y-4'>
                 {providerFeatures.map((feature, index) => (
-                  <div key={index} className='flex items-start gap-4 p-4 rounded-xl bg-white/5 border border-white/10'>
-                    <span className='text-2xl flex-shrink-0'>{feature.icon}</span>
+                  <div key={index} className='flex items-start'>
+                    <span className='text-xl mr-3 mt-0.5'>{feature.icon}</span>
                     <div>
-                      <h3 className='font-semibold mb-1' style={{ fontFamily: 'Inter, system-ui' }}>
-                        {feature.title}
-                      </h3>
-                      <p className='text-sm text-gray-300' style={{ fontFamily: 'Inter, system-ui' }}>
-                        {feature.description}
-                      </p>
+                      <h4 className='font-semibold text-[var(--theme-text)]'>{feature.title}</h4>
+                      <p className='text-[var(--theme-text-secondary)] text-sm'>{feature.description}</p>
                     </div>
                   </div>
                 ))}
@@ -335,7 +339,7 @@ const AboutPage = () => {
           </div>
         </motion.section>
 
-        {/* Unique Feature Highlight - Premium Plans */}
+        {/* Impact Statistics */}
         <motion.section
           variants={containerVariants}
           initial='hidden'
@@ -345,201 +349,62 @@ const AboutPage = () => {
         >
           <motion.div 
             variants={itemVariants}
-            className='rounded-2xl border border-white/10 bg-gradient-to-r from-[#F6EFD2]/10 via-[#E2DDB4]/10 to-[#F6EFD2]/10 backdrop-blur-md p-8 sm:p-12 shadow-[0_8px_30px_rgba(0,0,0,0.25)] text-center'
+            className='text-center mb-12'
           >
-            <div className='mb-6'>
-              <span className='text-5xl'>⭐</span>
-            </div>
-            
-            <h2 className='text-3xl font-bold mb-4' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
-              Introducing <span className='text-[#F6EFD2]'>Premium Plans</span>
-            </h2>
-            
-            <p className='text-xl text-gray-300 mb-6 max-w-3xl mx-auto leading-relaxed' style={{ fontFamily: 'Inter, system-ui' }}>
-              Pakistan's first premium subscription service, ensuring value and comfort for all subscribers.
-            </p>
-            
-            <div className='inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#F6EFD2]/20 to-[#E2DDB4]/20 border border-[#F6EFD2]/30'>
-              <span className='text-[#F6EFD2] font-semibold' style={{ fontFamily: 'Inter, system-ui' }}>
-                Enhancing value, one subscription at a time
-              </span>
-            </div>
-          </motion.div>
-        </motion.section>
-
-        {/* Impact Numbers */}
-        <motion.section
-          variants={containerVariants}
-          initial='hidden'
-          whileInView='visible'
-          viewport={{ once: true, amount: 0.2 }}
-          className='mb-20'
-        >
-          <motion.div variants={itemVariants} className='text-center mb-12'>
-            <h2 className='text-3xl sm:text-4xl font-bold mb-4' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
-              Our Impact
-            </h2>
-            <p className='text-gray-300 max-w-2xl mx-auto' style={{ fontFamily: 'Inter, system-ui' }}>
-              The numbers that showcase our growing community
+            <h2 className='text-2xl sm:text-3xl font-bold mb-4 text-[var(--theme-text)]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>Our Impact</h2>
+            <p className='text-[var(--theme-text-secondary)] max-w-2xl mx-auto' style={{ fontFamily: 'Inter, system-ui' }}>
+              Making a difference in Pakistan's subscription landscape
             </p>
           </motion.div>
-
-          <div className='grid grid-cols-2 lg:grid-cols-4 gap-6'>
+          
+          <div className='grid grid-cols-2 md:grid-cols-4 gap-6'>
             {stats.map((stat, index) => (
               <motion.div
                 key={index}
                 variants={itemVariants}
-                whileHover={{ scale: 1.05 }}
-                className='rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6 shadow-[0_8px_30px_rgba(0,0,0,0.25)] text-center'
+                className='text-center p-6 rounded-2xl border border-[var(--theme-glass-border)] bg-[var(--theme-glass-background)] backdrop-blur-md shadow-[var(--theme-glass-shadow)]'
               >
-                <div className='text-3xl sm:text-4xl font-bold bg-gradient-to-r from-[#E43636] via-[#F6EFD2] to-[#E2DDB4] bg-clip-text text-transparent mb-2' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
-                  {stat.number}
-                </div>
-                <p className='text-sm text-gray-300' style={{ fontFamily: 'Inter, system-ui' }}>
-                  {stat.label}
-                </p>
+                <p className='text-3xl font-bold text-[var(--theme-primary)] mb-2'>{stat.number}</p>
+                <p className='text-[var(--theme-text-secondary)]'>{stat.label}</p>
               </motion.div>
             ))}
           </div>
         </motion.section>
 
-        {/* Developer Section */}
+        {/* CTA Section */}
         <motion.section
           variants={containerVariants}
           initial='hidden'
           whileInView='visible'
           viewport={{ once: true, amount: 0.2 }}
-          className='mb-20'
+          className='text-center mb-12'
         >
           <motion.div 
             variants={itemVariants}
-            className='rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-md p-8 sm:p-12 shadow-[0_8px_30px_rgba(0,0,0,0.25)]'
+            className='rounded-2xl border border-[var(--theme-glass-border)] bg-[var(--theme-glass-background)] backdrop-blur-md p-8 shadow-[var(--theme-glass-shadow)]'
           >
-            <div className='flex items-center gap-3 mb-8 justify-center'>
-              <span className='text-3xl'>👨‍💻</span>
-              <h2 className='text-3xl font-bold' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>Meet the Developer</h2>
-            </div>
-            
-            <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 items-center'>
-              {/* Developer Image */}
-              <motion.div 
-                variants={itemVariants}
-                className='lg:col-span-1 flex justify-center'
-              >
-                <div className='relative'>
-                  <div className='absolute inset-0 bg-gradient-to-r from-[#E43636] via-[#F6EFD2] to-[#E2DDB4] rounded-2xl blur-xl opacity-30'></div>
-                  <img 
-                    src={devImage} 
-                    alt='Gaurav Khatri - Founder & Developer' 
-                    className='relative w-48 h-48 sm:w-56 sm:h-56 rounded-2xl object-cover border-2 border-white/20 shadow-2xl'
-                  />
-                </div>
-              </motion.div>
-              
-              {/* Developer Info */}
-              <motion.div 
-                variants={itemVariants}
-                className='lg:col-span-2 text-center lg:text-left'
-              >
-                <h3 className='text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-[#E43636] via-[#F6EFD2] to-[#E2DDB4] bg-clip-text text-transparent' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
-                  Gaurav Khatri
-                </h3>
-                
-                <div className='space-y-4 text-gray-300'>
-                  <div className='flex items-center gap-2 justify-center lg:justify-start'>
-                    <span className='text-xl'>🚀</span>
-                    <span className='text-lg font-semibold text-[#F6EFD2]' style={{ fontFamily: 'Inter, system-ui' }}>Founder & Team Member</span>
-                  </div>
-                  
-                  <div className='flex items-center gap-2 justify-center lg:justify-start'>
-                    <span className='text-xl'>💻</span>
-                    <span className='text-lg font-semibold text-[#E2DDB4]' style={{ fontFamily: 'Inter, system-ui' }}>Solo MERN Stack Developer</span>
-                  </div>
-                  
-                  <div className='flex items-center gap-2 justify-center lg:justify-start'>
-                    <span className='text-xl'>🎓</span>
-                    <span className='text-base' style={{ fontFamily: 'Inter, system-ui' }}>Learning MERN Stack from Aptech Pakistan</span>
-                  </div>
-                  
-                  <div className='mt-6 p-4 rounded-xl bg-gradient-to-r from-[#E43636]/10 via-[#F6EFD2]/10 to-[#E2DDB4]/10 border border-white/10'>
-                    <p className='text-base leading-relaxed' style={{ fontFamily: 'Inter, system-ui' }}>
-                      Gaurav is the sole developer and visionary behind Next Subscription, having built this entire MERN stack application 
-                      from the ground up. With a passion for creating meaningful technology solutions, he continues to learn 
-                      and innovate while developing this comprehensive subscription management platform.
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-            
-            {/* Competition Project Notice */}
-            <motion.div 
-              variants={itemVariants}
-              className='mt-8 pt-8 border-t border-white/10'
-            >
-              <div className='bg-gradient-to-r from-[#E2DDB4]/20 via-[#F6EFD2]/20 to-[#E43636]/20 border border-[#E2DDB4]/30 rounded-xl p-6 text-center'>
-                <div className='flex items-center justify-center gap-2 mb-3'>
-                  <span className='text-2xl'>🏆</span>
-                  <h4 className='text-xl font-bold text-[#E2DDB4]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>Competition Project</h4>
-                </div>
-                <p className='text-gray-300 max-w-2xl mx-auto' style={{ fontFamily: 'Inter, system-ui' }}>
-                  <strong>Important Notice:</strong> Next Subscription is developed as part of a coding competition project, 
-                  not as a commercial business venture. This showcase demonstrates full-stack development capabilities 
-                  and innovative thinking in the subscription management technology space.
-                </p>
-              </div>
-            </motion.div>
-          </motion.div>
-        </motion.section>
-
-        {/* Call to Action */}
-        <motion.section
-          variants={containerVariants}
-          initial='hidden'
-          whileInView='visible'
-          viewport={{ once: true, amount: 0.2 }}
-          className='text-center'
-        >
-          <motion.div 
-            variants={itemVariants}
-            className='rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-md p-8 sm:p-12 shadow-[0_8px_30px_rgba(0,0,0,0.25)]'
-          >
-            <h2 className='text-3xl sm:text-4xl font-bold mb-4' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
-              Ready to Manage Your Subscriptions Smarter?
-            </h2>
-            
-            <p className='text-xl text-gray-300 mb-8 max-w-2xl mx-auto' style={{ fontFamily: 'Inter, system-ui' }}>
-              Join Next Subscription today and be part of Pakistan's subscription management revolution — one secure, affordable service at a time.
+            <h2 className='text-2xl sm:text-3xl font-bold mb-4 text-[var(--theme-text)]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>Ready to Simplify Your Subscriptions?</h2>
+            <p className='text-[var(--theme-text-secondary)] mb-6 max-w-2xl mx-auto' style={{ fontFamily: 'Inter, system-ui' }}>
+              Join thousands of subscribers and providers who trust Next Subscription to manage their digital services.
             </p>
-            
-            <div className='flex flex-col sm:flex-row items-center justify-center gap-4'>
+            <div className='flex flex-col sm:flex-row gap-4 justify-center'>
               <Link
                 to='/user/register'
-                className='inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#E43636] to-[#F6EFD2] px-8 py-4 text-white font-semibold shadow-[0_8px_30px_rgba(228,54,54,0.3)] hover:scale-[1.02] transition-transform'
+                className='inline-flex items-center justify-center rounded-full bg-[var(--theme-primary)] px-6 py-3 text-base font-bold text-white shadow-[var(--theme-shadow-brand)] hover:scale-[1.03] transition-transform'
                 style={{ fontFamily: 'Inter, system-ui' }}
               >
-                <span className='mr-2'>📱</span>
-                Manage Your Subscriptions
+                Get Started
               </Link>
-              
               <Link
-                to='/provider/register'
-                className='inline-flex items-center justify-center rounded-full border border-white/20 px-8 py-4 text-white font-semibold hover:bg-white/10 transition-colors'
+                to='/user/login'
+                className='inline-flex items-center justify-center rounded-full bg-[var(--theme-surface)] px-6 py-3 text-base font-bold text-[var(--theme-text)] border border-[var(--theme-border)] shadow-[var(--theme-shadow-small)] hover:scale-[1.03] transition-transform'
                 style={{ fontFamily: 'Inter, system-ui' }}
               >
-                <span className='mr-2'>🚗</span>
-                Become a Provider
+                Sign In
               </Link>
-            </div>
-            
-            <div className='mt-8 pt-8 border-t border-white/10'>
-              <p className='text-sm text-gray-400 italic' style={{ fontFamily: 'Inter, system-ui' }}>
-                "Manage Better. Pay Smarter." — Next Subscription
-              </p>
             </div>
           </motion.div>
         </motion.section>
-
       </main>
     </div>
   )

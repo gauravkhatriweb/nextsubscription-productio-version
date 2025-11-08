@@ -29,16 +29,15 @@ import { useNavigate } from 'react-router-dom';
 const Onboarding = () => {
   const navigate = useNavigate();
   return (
-    <div className='relative min-h-screen w-full bg-[#000000] text-white overflow-hidden'>
-      {/* Ambient gradient orbs */}
-      <div className='pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-[#E43636] via-[#F6EFD2] to-[#E2DDB4] blur-3xl opacity-30' />
-      <div className='pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-[#E2DDB4] via-[#E43636] to-[#F6EFD2] blur-3xl opacity-25' />
+    <div className='relative min-h-screen w-full bg-[var(--theme-background)] text-[var(--theme-text)] overflow-hidden'>
+      <div className='pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-[var(--theme-primary)] via-[var(--theme-accent)] to-[var(--theme-secondary)] blur-3xl opacity-30' />
+      <div className='pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-[var(--theme-secondary)] via-[var(--theme-primary)] to-[var(--theme-accent)] blur-3xl opacity-25' />
 
       <main className='relative z-10 flex min-h-screen items-center justify-center px-6'>
         <section className='w-full max-w-5xl text-center'>
           {/* Logo with soft glow */}
-          <div className='mx-auto mb-8 inline-flex items-center justify-center rounded-2xl p-[2px] bg-gradient-to-r from-[#E43636] via-[#F6EFD2] to-[#E2DDB4]'>
-            <div className='rounded-2xl bg-[#000000] p-4 sm:p-5'>
+          <div className='mx-auto mb-8 inline-flex items-center justify-center rounded-2xl p-[2px] bg-gradient-to-r from-[var(--theme-primary)] via-[var(--theme-accent)] to-[var(--theme-secondary)]'>
+            <div className='rounded-2xl bg-[var(--theme-background)] p-4 sm:p-5'>
               <img src={logo} alt='Next Subscription logo' className='h-12 w-12 sm:h-14 sm:w-14' />
             </div>
           </div>

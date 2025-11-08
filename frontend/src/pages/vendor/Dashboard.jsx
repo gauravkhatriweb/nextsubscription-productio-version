@@ -21,13 +21,28 @@ const Dashboard = () => {
     totalRevenue: 0,
     teamMembers: 0
   });
+  const [vendorInfo, setVendorInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const apiBase = (import.meta.env.VITE_API_BASE_URL && String(import.meta.env.VITE_API_BASE_URL).trim().replace(/\/+$/, '')) || 'http://localhost:3000';
 
   useEffect(() => {
+    fetchVendorInfo();
     fetchDashboardStats();
   }, []);
+
+  const fetchVendorInfo = async () => {
+    try {
+      const response = await axios.get(`${apiBase}/api/vendor/me`, {
+        withCredentials: true
+      });
+      if (response.data.success) {
+        setVendorInfo(response.data.vendor);
+      }
+    } catch (error) {
+      console.error('Failed to fetch vendor info:', error);
+    }
+  };
 
   const fetchDashboardStats = async () => {
     try {
@@ -79,11 +94,20 @@ const Dashboard = () => {
       <div className="space-y-6">
         {/* Header */}
         <div className="glass-card rounded-3xl p-8 border border-theme-base/30">
-          <h1 className="text-4xl font-bold mb-2 text-theme-primary" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
-            Dashboard
-          </h1>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-2 text-theme-primary" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
+                Dashboard
+              </h1>
+              {vendorInfo && (
+                <p className="text-lg text-theme-secondary">
+                  👋 Welcome back, <span className="font-semibold text-theme-primary">{vendorInfo.displayName || vendorInfo.companyName || 'Vendor'}</span>!
+                </p>
+              )}
+            </div>
+          </div>
           <p className="text-theme-secondary">
-            Overview of your vendor account and operations
+            Here's your current performance and active subscriptions.
           </p>
         </div>
 

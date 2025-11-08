@@ -11,12 +11,16 @@ import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
 
 import connectDB from './config/connectDB.js';
+
+// Import routes
 import userRoutes from './routes/user.route.js';
+import vendorRoutes from './routes/vendor.route.js';
 import adminRoutes from './routes/admin.route.js';
+import adminVendorRoutes from './routes/admin.vendor.route.js';
+import adminProductRequestRoutes from './routes/admin.productRequest.route.js';
+import adminStockRequestRoutes from './routes/admin.stockRequests.route.js';
 import adminSettingsRoutes from './routes/admin.settings.route.js';
 import adminSystemRoutes from './routes/admin.system.route.js';
-import adminVendorRoutes from './routes/admin.vendor.route.js';
-import vendorRoutes from './routes/vendor.route.js';
 
 dotenv.config();
 
@@ -52,6 +56,16 @@ app.use(cookieParser());
 
 app.use('/uploads', express.static('uploads'));
 
+// API Routes
+app.use('/api/users', userRoutes);
+app.use('/api/vendors', vendorRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/admin/vendors', adminVendorRoutes);
+app.use('/api/admin/product-requests', adminProductRequestRoutes);
+app.use('/api/admin/stock-requests', adminStockRequestRoutes);
+app.use('/api/admin/settings', adminSettingsRoutes);
+app.use('/api/admin/system', adminSystemRoutes);
+
 if (NODE_ENV === 'production') {
   app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -64,7 +78,7 @@ if (NODE_ENV === 'production') {
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
-    service: 'Sawari.pk Backend API',
+    service: 'Next Subscription Backend API',
     version: '2.0.0',
     environment: NODE_ENV,
     timestamp: new Date().toISOString()
@@ -99,31 +113,7 @@ app.get('/health', async (req, res) => {
   }
 });
 
-/**
- * API routes
- */
-try {
-  app.use('/api/users', userRoutes);
-  app.use('/api/admin', adminRoutes);
-  app.use('/api/admin/settings', adminSettingsRoutes);
-  app.use('/api/admin/system', adminSystemRoutes);
-  app.use('/api/admin/vendors', adminVendorRoutes);
-  app.use('/api/vendor', vendorRoutes);
-  
-  // Debug: Log registered routes
-  if (NODE_ENV === 'development') {
-    console.log('📋 Registered routes:');
-    console.log('   - /api/users/*');
-    console.log('   - /api/admin/*');
-    console.log('   - /api/admin/settings/*');
-    console.log('   - /api/admin/system/*');
-    console.log('   - /api/admin/vendors/*');
-    console.log('   - /api/vendor/*');
-  }
-} catch (error) {
-  console.error('❌ Error registering routes:', error);
-  process.exit(1);
-}
+
 
 /**
  * 404 catch-all — must be after all routes but before error handler
@@ -174,9 +164,38 @@ const validateEnvVars = () => {
     }
   });
   
-  // Warn about encryption key (critical for vendor product credentials)
-  if (!process.env.ENCRYPTION_KEY || process.env.ENCRYPTION_KEY.length < 32) {
-    warnings.push('⚠️  WARNING: ENCRYPTION_KEY not set or too short (< 32 chars). Vendor product credentials will not be encrypted properly!');
+  // FIX: Enforce strong encryption key at startup to avoid runtime password failures
+  const rawKey = process.env.ENCRYPTION_KEY;
+  const keyError = (() => {
+    if (!rawKey) {
+      return 'ENCRYPTION_KEY environment variable is missing. Generate a 32-byte key (e.g. node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))") and add it to your .env file.';
+    }
+
+    const trimmed = rawKey.trim();
+    let buffer;
+
+    try {
+      if (/^[0-9a-fA-F]{64}$/.test(trimmed)) {
+        buffer = Buffer.from(trimmed, 'hex');
+      } else if (/^[A-Za-z0-9+/]{43}=*$/.test(trimmed)) {
+        buffer = Buffer.from(trimmed, 'base64');
+      } else {
+        buffer = Buffer.from(trimmed, 'utf8');
+      }
+    } catch (error) {
+      return `ENCRYPTION_KEY could not be parsed: ${error.message}`;
+    }
+
+    if (!buffer || buffer.length < 32) {
+      return 'ENCRYPTION_KEY must resolve to at least 32 bytes. Use 32 ASCII chars, a 64-character hex string, or a 44-character base64 value.';
+    }
+
+    return null;
+  })();
+
+  if (keyError) {
+    console.error(`❌ CRITICAL: ${keyError}`);
+    process.exit(1);
   }
   
   if (warnings.length > 0) {

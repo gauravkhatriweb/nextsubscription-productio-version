@@ -92,29 +92,28 @@ const FAQPage = () => {
   ]
 
   return (
-    <div className='relative min-h-screen w-full bg-[#000000] text-white overflow-hidden'>
-      {/* Ambient gradient orbs */}
-      <div className='pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-[#E43636] via-[#F6EFD2] to-[#E2DDB4] blur-3xl opacity-30' />
-      <div className='pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-[#E2DDB4] via-[#E43636] to-[#F6EFD2] blur-3xl opacity-25' />
+    <div className='relative min-h-screen w-full bg-[var(--theme-background)] text-[var(--theme-text)] overflow-hidden'>
+      <div className='pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-[var(--theme-primary)]/20 via-[var(--theme-secondary)]/10 to-[var(--theme-accent)]/10 blur-3xl opacity-40' />
+      <div className='pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-[var(--theme-primary)]/15 via-[var(--theme-secondary)]/10 to-[var(--theme-accent)]/10 blur-3xl opacity-30' />
 
       <main className='relative z-10 mx-auto max-w-4xl px-6 py-12 sm:py-16'>
         <header className='mb-6 sm:mb-8'>
-          <h1 className='text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
+          <h1 className='text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[var(--theme-text)]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
             Frequently Asked Questions
           </h1>
-          <p className='mt-2 text-sm text-gray-300' style={{ fontFamily: 'Inter, system-ui' }}>
+          <p className='mt-2 text-[var(--theme-text-secondary)]' style={{ fontFamily: 'Inter, system-ui' }}>
             Find quick answers to common questions about Next Subscription
           </p>
         </header>
 
         <article className='prose prose-invert max-w-none'>
-          <section className='rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-7 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.35)]'>
+          <section className='rounded-2xl border border-[var(--theme-glass-border)] bg-[var(--theme-glass-background)] p-5 sm:p-7 backdrop-blur-md shadow-[var(--theme-glass-shadow)]'>
             {/* Introduction */}
             <div className='mb-8'>
-              <h2 className='text-xl font-semibold mb-3 text-[#E43636]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
+              <h2 className='text-xl font-semibold mb-3 text-[var(--theme-primary)]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
                 Next Subscription User FAQs
               </h2>
-              <p className='text-sm text-gray-300 leading-relaxed' style={{ fontFamily: 'Inter, system-ui' }}>
+              <p className='text-[var(--theme-text-secondary)] leading-relaxed' style={{ fontFamily: 'Inter, system-ui' }}>
                 Welcome to our comprehensive FAQ section! Here you'll find answers to the most commonly asked questions about using Next Subscription. 
                 Whether you're a new user getting started or an existing subscriber looking for specific information, we've got you covered.
               </p>
@@ -122,63 +121,63 @@ const FAQPage = () => {
 
             {/* FAQ Categories */}
             <div className='mb-8'>
-              <h3 className='text-lg font-semibold mb-4 text-[#F6EFD2]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
+              <h3 className='text-lg font-semibold mb-4 text-[var(--theme-accent)]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
                 Quick Categories
               </h3>
               <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
-                <div className='text-center p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors'>
-                  <div className='w-6 h-6 mx-auto mb-2 text-[#E43636]'>
+                <div className='text-center p-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] hover:bg-[var(--theme-surface-hover)] transition-colors'>
+                  <div className='w-6 h-6 mx-auto mb-2 text-[var(--theme-primary)]'>
                     <svg fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                       <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' />
                     </svg>
                   </div>
-                  <span className='text-xs font-medium' style={{ fontFamily: 'Inter, system-ui' }}>Account</span>
+                  <span className='text-xs font-medium text-[var(--theme-text)]' style={{ fontFamily: 'Inter, system-ui' }}>Account</span>
                 </div>
-                <div className='text-center p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors'>
-                  <div className='w-6 h-6 mx-auto mb-2 text-[#E2DDB4]'>
+                <div className='text-center p-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] hover:bg-[var(--theme-surface-hover)] transition-colors'>
+                  <div className='w-6 h-6 mx-auto mb-2 text-[var(--theme-secondary)]'>
                     <svg fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                       <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' />
                     </svg>
                   </div>
-                  <span className='text-xs font-medium' style={{ fontFamily: 'Inter, system-ui' }}>Subscriptions</span>
+                  <span className='text-xs font-medium text-[var(--theme-text)]' style={{ fontFamily: 'Inter, system-ui' }}>Subscriptions</span>
                 </div>
-                <div className='text-center p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors'>
-                  <div className='w-6 h-6 mx-auto mb-2 text-[#F6EFD2]'>
+                <div className='text-center p-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] hover:bg-[var(--theme-surface-hover)] transition-colors'>
+                  <div className='w-6 h-6 mx-auto mb-2 text-[var(--theme-accent)]'>
                     <svg fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                       <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z' />
                     </svg>
                   </div>
-                  <span className='text-xs font-medium' style={{ fontFamily: 'Inter, system-ui' }}>Security</span>
+                  <span className='text-xs font-medium text-[var(--theme-text)]' style={{ fontFamily: 'Inter, system-ui' }}>Security</span>
                 </div>
-                <div className='text-center p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors'>
-                  <div className='w-6 h-6 mx-auto mb-2 text-[#F6EFD2]'>
+                <div className='text-center p-3 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] hover:bg-[var(--theme-surface-hover)] transition-colors'>
+                  <div className='w-6 h-6 mx-auto mb-2 text-[var(--theme-accent)]'>
                     <svg fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                       <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z' />
                     </svg>
                   </div>
-                  <span className='text-xs font-medium' style={{ fontFamily: 'Inter, system-ui' }}>Payment</span>
+                  <span className='text-xs font-medium text-[var(--theme-text)]' style={{ fontFamily: 'Inter, system-ui' }}>Payment</span>
                 </div>
               </div>
             </div>
 
             {/* FAQ List */}
             <div className='space-y-4'>
-              <h3 className='text-lg font-semibold mb-4 text-[#E2DDB4]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
+              <h3 className='text-lg font-semibold mb-4 text-[var(--theme-secondary)]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
                 All Frequently Asked Questions
               </h3>
               {faqs.map((faq, index) => (
                 <div 
                   key={index} 
-                  className='rounded-xl border border-white/10 bg-white/5 overflow-hidden hover:bg-white/10 transition-colors'
+                  className='rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] overflow-hidden hover:bg-[var(--theme-surface-hover)] transition-colors'
                 >
                   <button
                     onClick={() => toggleFAQ(index)}
-                    className='w-full text-left p-4 sm:p-5 flex items-center justify-between focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E43636] focus-visible:ring-opacity-50'
+                    className='w-full text-left p-4 sm:p-5 flex items-center justify-between focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--theme-primary)] focus-visible:ring-opacity-50'
                   >
-                    <h4 className='text-sm sm:text-base font-semibold text-white pr-4' style={{ fontFamily: 'Inter, system-ui' }}>
+                    <h4 className='text-sm sm:text-base font-semibold text-[var(--theme-text)] pr-4' style={{ fontFamily: 'Inter, system-ui' }}>
                       {faq.question}
                     </h4>
-                    <div className={`flex-shrink-0 w-6 h-6 text-[#E43636] transition-transform duration-200 ${openFAQ === index ? 'rotate-180' : ''}`}>
+                    <div className={`flex-shrink-0 w-6 h-6 text-[var(--theme-primary)] transition-transform duration-200 ${openFAQ === index ? 'rotate-180' : ''}`}>
                       <svg fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                         <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M19 9l-7 7-7-7' />
                       </svg>
@@ -186,7 +185,7 @@ const FAQPage = () => {
                   </button>
                   {openFAQ === index && (
                     <div className='px-4 sm:px-5 pb-4 sm:pb-5'>
-                      <p className='text-sm text-gray-300 leading-relaxed' style={{ fontFamily: 'Inter, system-ui' }}>
+                      <p className='text-[var(--theme-text-secondary)] leading-relaxed' style={{ fontFamily: 'Inter, system-ui' }}>
                         {faq.answer}
                       </p>
                     </div>
@@ -196,48 +195,30 @@ const FAQPage = () => {
             </div>
 
             {/* Additional Help Section */}
-            <div className='mt-8 pt-6 border-t border-white/10'>
-              <h3 className='text-lg font-semibold mb-4 text-[#F6EFD2]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
+            <div className='mt-8 pt-6 border-t border-[var(--theme-border)]'>
+              <h3 className='text-lg font-semibold mb-4 text-[var(--theme-accent)]' style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
                 Still Need Help?
               </h3>
-              <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                <Link 
-                  to='/legal/contact'
-                  className='flex items-center gap-3 p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors group'
-                >
-                  <div className='flex-shrink-0 w-10 h-10 rounded-full bg-[#E43636]/20 flex items-center justify-center group-hover:bg-[#E43636]/30 transition-colors'>
-                    <svg className='w-5 h-5 text-[#E43636]' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className='font-semibold text-white text-sm' style={{ fontFamily: 'Inter, system-ui' }}>Contact Support</h4>
-                    <p className='text-xs text-gray-400' style={{ fontFamily: 'Inter, system-ui' }}>Get direct help from our team</p>
-                  </div>
-                </Link>
-
-                <div className='flex items-center gap-3 p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors'>
-                  <div className='flex-shrink-0 w-10 h-10 rounded-full bg-[#E2DDB4]/20 flex items-center justify-center'>
-                    <svg className='w-5 h-5 text-[#E2DDB4]' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2v-6a2 2 0 012-2h8z' />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className='font-semibold text-white text-sm' style={{ fontFamily: 'Inter, system-ui' }}>Live Chat</h4>
-                    <p className='text-xs text-gray-400' style={{ fontFamily: 'Inter, system-ui' }}>Chat with us in real-time</p>
-                  </div>
-                </div>
-
-                <div className='flex items-center gap-3 p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors'>
-                  <div className='flex-shrink-0 w-10 h-10 rounded-full bg-[#F6EFD2]/20 flex items-center justify-center'>
-                    <svg className='w-5 h-5 text-[#F6EFD2]' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z' />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className='font-semibold text-white text-sm' style={{ fontFamily: 'Inter, system-ui' }}>Call Support</h4>
-                    <p className='text-xs text-gray-400' style={{ fontFamily: 'Inter, system-ui' }}>+92-21-12345678</p>
-                  </div>
+              <div className='rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5'>
+                <p className='text-[var(--theme-text-secondary)] mb-4' style={{ fontFamily: 'Inter, system-ui' }}>
+                  If you couldn't find the answer to your question, our support team is here to help. 
+                  We're available 24/7 to assist you with any issues or concerns you may have.
+                </p>
+                <div className='flex flex-col sm:flex-row gap-3'>
+                  <Link 
+                    to='/legal/contact' 
+                    className='inline-flex items-center justify-center rounded-full bg-[var(--theme-primary)] px-5 py-2.5 text-sm font-bold text-white shadow-[var(--theme-shadow-brand)] hover:scale-[1.02] transition-transform'
+                    style={{ fontFamily: 'Inter, system-ui' }}
+                  >
+                    Contact Support
+                  </Link>
+                  <Link 
+                    to='/user/login' 
+                    className='inline-flex items-center justify-center rounded-full bg-[var(--theme-surface)] px-5 py-2.5 text-sm font-bold text-[var(--theme-text)] border border-[var(--theme-border)] shadow-[var(--theme-shadow-small)] hover:scale-[1.02] transition-transform'
+                    style={{ fontFamily: 'Inter, system-ui' }}
+                  >
+                    Go to Dashboard
+                  </Link>
                 </div>
               </div>
             </div>
@@ -246,14 +227,14 @@ const FAQPage = () => {
           <div className='mt-8 flex items-center justify-center'>
             <Link
               to='/'
-              className='inline-flex items-center justify-center rounded-full bg-black px-6 py-3 text-sm font-bold text-white ring-1 ring-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.35)] hover:scale-[1.01] transition'
+              className='inline-flex items-center justify-center rounded-full bg-[var(--theme-surface)] px-6 py-3 text-sm font-bold text-[var(--theme-text)] ring-1 ring-[var(--theme-border)] shadow-[var(--theme-shadow-small)] hover:scale-[1.01] transition'
               style={{ fontFamily: 'Inter, system-ui' }}
             >
               Back to Home
             </Link>
           </div>
 
-          <footer className='mt-6 text-xs text-gray-400' style={{ fontFamily: 'Inter, system-ui' }}>
+          <footer className='mt-6 text-xs text-[var(--theme-text-subtle)]' style={{ fontFamily: 'Inter, system-ui' }}>
             Last updated: {new Date().toLocaleDateString()}
           </footer>
         </article>

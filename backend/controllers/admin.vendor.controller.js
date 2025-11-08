@@ -15,7 +15,8 @@ import {
   updateVendor,
   updateVendorStatus,
   resendCredentials,
-  resetVendorPassword
+  resetVendorPassword,
+  getVendorPasswordForAdmin
 } from '../services/vendor.service.js';
 
 /**
@@ -30,7 +31,7 @@ export const createVendorController = async (req, res) => {
     const userAgent = req.headers['user-agent'] || 'unknown';
     
     // Extract notification preferences (don't send notes to vendor)
-    const { sendEmail: sendEmailNotification, sendWhatsApp, whatsappNumber, ...vendorData } = req.body;
+    const { sendEmail: sendEmailNotification, ...vendorData } = req.body;
     
     // Remove notes from vendor data (admin-only)
     delete vendorData.notes;
@@ -41,9 +42,7 @@ export const createVendorController = async (req, res) => {
       ipAddress,
       userAgent,
       {
-        sendEmail: sendEmailNotification !== false, // Default to true
-        sendWhatsApp: sendWhatsApp === true,
-        whatsappNumber
+        sendEmail: sendEmailNotification !== false // Default to true
       }
     );
     
@@ -110,6 +109,36 @@ export const getVendorByIdController = async (req, res) => {
 };
 
 /**
+ * Get Vendor Password (Admin Only)
+ *
+ * @route GET /api/admin/vendors/:id/password
+ */
+export const getVendorPasswordController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adminEmail = req.admin?.email || null;
+    const ipAddress = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for']?.split(',')[0] || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
+
+    const result = await getVendorPasswordForAdmin(id, adminEmail, ipAddress, userAgent);
+
+    return res.status(200).json({
+      success: true,
+      password: result.password,
+      method: result.method,
+      initialPasswordSet: result.initialPasswordSet
+    });
+  } catch (error) {
+    const message = error.message || 'Failed to retrieve vendor password';
+    const statusCode = message === 'Vendor not found' ? 404 : 400;
+    return res.status(statusCode).json({
+      success: false,
+      message
+    });
+  }
+};
+
+/**
  * Update Vendor
  * 
  * @route PUT /api/admin/vendors/:id
@@ -144,7 +173,7 @@ export const updateVendorController = async (req, res) => {
 export const updateVendorStatusController = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, rejectionReason, sendEmail: sendEmailNotification, sendWhatsApp, whatsappNumber } = req.body;
+    const { status, rejectionReason, sendEmail: sendEmailNotification } = req.body;
     
     if (!['pending', 'active', 'suspended', 'rejected'].includes(status)) {
       return res.status(400).json({
@@ -165,8 +194,6 @@ export const updateVendorStatusController = async (req, res) => {
       userAgent,
       {
         sendEmail: sendEmailNotification !== false,
-        sendWhatsApp: sendWhatsApp === true,
-        whatsappNumber,
         rejectionReason
       }
     );
@@ -174,8 +201,7 @@ export const updateVendorStatusController = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: 'Vendor status updated successfully',
-      data: result.vendor,
-      whatsappUrl: result.whatsappUrl
+      data: result.vendor
     });
   } catch (error) {
     return res.status(400).json({
@@ -193,7 +219,7 @@ export const updateVendorStatusController = async (req, res) => {
 export const resendCredentialsController = async (req, res) => {
   try {
     const { id } = req.params;
-    const { sendEmail: sendEmailNotification, sendWhatsApp, whatsappNumber } = req.body;
+    const { sendEmail: sendEmailNotification } = req.body;
     const adminEmail = req.admin?.email || null;
     const ipAddress = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for']?.split(',')[0] || 'unknown';
     const userAgent = req.headers['user-agent'] || 'unknown';
@@ -204,17 +230,14 @@ export const resendCredentialsController = async (req, res) => {
       ipAddress,
       userAgent,
       {
-        sendEmail: sendEmailNotification !== false,
-        sendWhatsApp: sendWhatsApp === true,
-        whatsappNumber
+        sendEmail: sendEmailNotification !== false
       }
     );
     
     return res.status(200).json({
       success: true,
       message: result.message,
-      temporaryPassword: result.temporaryPassword,
-      whatsappUrl: result.whatsappUrl
+      temporaryPassword: result.temporaryPassword
     });
   } catch (error) {
     return res.status(400).json({

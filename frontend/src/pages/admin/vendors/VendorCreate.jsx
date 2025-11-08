@@ -16,7 +16,6 @@ import { CURRENCIES, COUNTRIES } from '../../../utils/constants';
 const VendorCreate = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [showWhatsAppUrl, setShowWhatsAppUrl] = useState(null);
   const [vendorPassword, setVendorPassword] = useState(null);
   const [formData, setFormData] = useState({
     companyName: '',
@@ -27,9 +26,7 @@ const VendorCreate = () => {
     currency: 'USD',
     status: 'pending',
     notes: '',
-    sendEmail: true,
-    sendWhatsApp: false,
-    whatsappNumber: ''
+    sendEmail: true
   });
 
   const apiBase = (import.meta.env.VITE_API_BASE_URL && String(import.meta.env.VITE_API_BASE_URL).trim().replace(/\/+$/, '')) || 'http://localhost:3000';
@@ -71,13 +68,8 @@ const VendorCreate = () => {
         if (response.data.data.temporaryPassword) {
           setVendorPassword(response.data.data.temporaryPassword);
         }
-        if (response.data.data.whatsappUrl) {
-          setShowWhatsAppUrl(response.data.data.whatsappUrl);
-        } else {
-          // Don't navigate if password is shown
-          if (!response.data.data.temporaryPassword) {
-            navigate('/admin/vendors');
-          }
+        if (!response.data.data.temporaryPassword) {
+          navigate('/admin/vendors');
         }
       }
     } catch (error) {
@@ -233,28 +225,6 @@ const VendorCreate = () => {
                 />
                 <span className="text-theme-primary">📧 Send Email</span>
               </label>
-              
-              <div>
-                <label className="flex items-center gap-3 mb-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.sendWhatsApp}
-                    onChange={(e) => setFormData(prev => ({ ...prev, sendWhatsApp: e.target.checked }))}
-                    className="rounded"
-                  />
-                  <span className="text-theme-primary">💬 Send WhatsApp Message</span>
-                </label>
-                {formData.sendWhatsApp && (
-                  <input
-                    type="tel"
-                    name="whatsappNumber"
-                    value={formData.whatsappNumber}
-                    onChange={handleChange}
-                    placeholder="+1234567890 (with country code)"
-                    className="mt-2 w-full rounded-xl border border-theme-base bg-theme-surface px-4 py-3 text-theme-primary focus:outline-none focus:ring-2 focus:ring-brand-primary"
-                  />
-                )}
-              </div>
             </div>
           </div>
 
@@ -303,56 +273,7 @@ const VendorCreate = () => {
             </div>
           )}
 
-          {/* WhatsApp Message */}
-          {showWhatsAppUrl && (
-            <div className="mt-6 p-6 bg-success/10 border border-success/30 rounded-xl">
-              <p className="text-sm font-semibold text-theme-primary mb-3">
-                ✅ Vendor created successfully!
-              </p>
-              <p className="text-sm text-theme-secondary mb-4">
-                Copy the WhatsApp message below and send it to the vendor:
-              </p>
-              <div className="bg-black/30 rounded-lg p-4 mb-4">
-                <textarea
-                  readOnly
-                  value={decodeURIComponent(showWhatsAppUrl.split('text=')[1] || '')}
-                  className="w-full bg-transparent text-theme-primary font-mono text-sm resize-none border-none outline-none"
-                  rows={10}
-                  onClick={(e) => e.target.select()}
-                />
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => {
-                    const message = decodeURIComponent(showWhatsAppUrl.split('text=')[1] || '');
-                    navigator.clipboard.writeText(message);
-                    toast.success('Message copied to clipboard!');
-                  }}
-                  className="flex-1 px-4 py-2 bg-brand-primary text-white rounded-lg font-semibold hover:bg-brand-primary-hover transition-colors"
-                >
-                  📋 Copy Message
-                </button>
-                <a
-                  href={showWhatsAppUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 px-4 py-2 bg-success text-white rounded-lg font-semibold hover:bg-success/90 transition-colors text-center"
-                >
-                  📱 Open WhatsApp
-                </a>
-              </div>
-              <button
-                onClick={() => {
-                  setShowWhatsAppUrl(null);
-                  setVendorPassword(null);
-                  navigate('/admin/vendors');
-                }}
-                className="w-full mt-3 px-4 py-2 border border-theme-base rounded-lg font-semibold hover:bg-theme-surface transition-colors"
-              >
-                Done
-              </button>
-            </div>
-          )}
+          {/* WhatsApp Message Removed: Manual templates used in Vendors List / Detail */}
         </form>
       </div>
     </AdminLayout>

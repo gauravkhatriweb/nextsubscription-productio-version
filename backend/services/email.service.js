@@ -36,20 +36,26 @@ const EMAIL_CONFIG = {
  * @returns {nodemailer.Transporter} Configured nodemailer transporter
  * @throws {Error} If email credentials are not configured
  */
+let cachedTransporter = null;
+
 const createTransporter = () => {
-    // Validate email credentials from environment variables
+    if (cachedTransporter) {
+        return cachedTransporter;
+    }
+
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
         throw new Error('Email credentials are not configured');
     }
 
-    // Create and return configured transporter
-    return nodemailer.createTransport({
+    cachedTransporter = nodemailer.createTransport({
         ...EMAIL_CONFIG,
         auth: {
-            user: process.env.EMAIL_USER, // Gmail address
-            pass: process.env.EMAIL_PASS, // Gmail App Password (not regular password)
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
         },
     });
+
+    return cachedTransporter;
 };
 
 /**
@@ -76,7 +82,8 @@ export const sendEmail = async (email, subject, message) => {
 
         // Send email with configured options
         const info = await transporter.sendMail({
-            from: `"Sawari.pk - Your Travel Partner" <${process.env.EMAIL_USER}>`,
+            // FIX: Allow configurable from name/address for consistency across environments
+            from: process.env.EMAIL_FROM || `Next Subscription Admin <${process.env.EMAIL_USER}>`,
             to: email,
             subject: subject,
             text: message, // Plain text version
