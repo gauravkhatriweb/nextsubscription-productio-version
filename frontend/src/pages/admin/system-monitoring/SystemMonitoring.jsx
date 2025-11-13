@@ -7,25 +7,22 @@
  * @component
  */
 
-import React, { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import AdminLayout from '../../../components/AdminLayout';
 import SystemCard from './SystemCard';
 import MetricChart from './MetricChart';
 import MaintenanceActions from './MaintenanceActions';
-import LogViewer from './LogViewer';
+import SystemLogsPanel from './SystemLogsPanel';
 import LineChart from '../../../components/admin/system-monitoring/LineChart';
 import AreaChart from '../../../components/admin/system-monitoring/AreaChart';
 import BarChart from '../../../components/admin/system-monitoring/BarChart';
 import PieChart from '../../../components/admin/system-monitoring/PieChart';
 import { useHealthStatus } from '../../../hooks/useHealthStatus';
-import { getSystemLogs, clearSystemLogs } from '../../../lib/api/health';
 
 const SystemMonitoring = () => {
-  const [logs, setLogs] = useState([]);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  
+
   // MONITORING: Use health status hook with 10-second polling
   // Use admin endpoint for authenticated requests
   const { data: healthData, loading, error, lastUpdated, history, getChartData, refresh } = useHealthStatus({
@@ -34,44 +31,11 @@ const SystemMonitoring = () => {
     useAdminEndpoint: true // MONITORING: Use admin endpoint for authenticated requests
   });
 
-  // Fetch logs
-  const fetchLogs = async () => {
-    try {
-      const logsData = await getSystemLogs(50);
-      setLogs(logsData);
-    } catch (error) {
-      // Silent fail for logs
-      console.error('Failed to fetch logs:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchLogs();
-    
-    // Refresh logs every 30 seconds
-    const logsInterval = setInterval(() => {
-      fetchLogs();
-    }, 30000);
-    
-    return () => clearInterval(logsInterval);
-  }, []);
-
   const handleActionComplete = () => {
     // Refresh status after action
     setTimeout(() => {
       refresh();
-      fetchLogs();
     }, 1000);
-  };
-
-  const handleClearLogs = async () => {
-    try {
-      await clearSystemLogs();
-      setLogs([]);
-      toast.success('Logs cleared successfully');
-    } catch (error) {
-      toast.error('Failed to clear logs');
-    }
   };
 
   if (loading && !healthData) {
@@ -111,6 +75,7 @@ const SystemMonitoring = () => {
   const api = health?.api || {};
   const system = health?.system || {};
   const externalServices = health?.externalServices || {};
+  const externalSummary = externalServices?.summary || { servicesOnline: 0, servicesTotal: 0, percentageOnline: 0 };
   const frontend = health?.frontend || {};
   const security = health?.security || {};
   
@@ -193,14 +158,17 @@ const SystemMonitoring = () => {
   ];
 
   // MONITORING: Prepare pie chart data (external services)
-  const externalServicesData = Object.entries(externalServices).map(([key, value]) => {
-    const status = value?.status || value || 'UNKNOWN';
-    return {
-      name: key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()),
-      value: status === 'UP' ? 1 : status === 'DOWN' ? 0 : 0.5,
-      status: status
-    };
-  }).filter(item => item.value !== undefined);
+  const externalServicesData = Object.entries(externalServices)
+    .map(([key, value]) => {
+      if (key === 'summary') return null;
+      const status = value?.status || value || 'UNKNOWN';
+      return {
+        name: key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()),
+        value: status === 'UP' ? 1 : status === 'DOWN' ? 0 : 0.5,
+        status: status
+      };
+    })
+    .filter(item => item && item.value !== undefined);
 
   return (
     <AdminLayout currentPage="monitoring">
@@ -213,8 +181,8 @@ const SystemMonitoring = () => {
         >
           <div>
             <h2 className="text-2xl sm:text-3xl font-bold text-theme-primary mb-2" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
-              System Health Overview
-            </h2>
+            System Health Overview
+          </h2>
             <p className="text-theme-secondary text-sm">
               {lastUpdated && `Last updated: ${new Date(lastUpdated).toLocaleTimeString()}`}
               {health?.cached && ` (Cached)`}
@@ -264,8 +232,8 @@ const SystemMonitoring = () => {
               'bg-error/20 text-error'
             }`}>
               {overallStatus}
-            </div>
           </div>
+        </div>
         </motion.div>
 
         {/* System Health Summary - Key Metrics */}
@@ -275,18 +243,18 @@ const SystemMonitoring = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1 }}
           >
-            <SystemCard
-              title="CPU Usage"
+          <SystemCard
+            title="CPU Usage"
               value={system.cpuUsage || '0%'}
               status={getStatusFromValue(system.cpuUsagePercent || system.cpuUsage)}
-              icon="⚡"
+            icon="⚡"
               subtitle={`${system.cpuCount || 'N/A'} cores • ${system.cpuTemperature || 'N/A'}`}
-            >
-              <MetricChart
+          >
+            <MetricChart
                 value={system.cpuUsagePercent || parseFloat(system.cpuUsage) || 0}
-                label="CPU"
-              />
-            </SystemCard>
+              label="CPU"
+            />
+          </SystemCard>
           </motion.div>
 
           <motion.div
@@ -294,18 +262,18 @@ const SystemMonitoring = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <SystemCard
-              title="Memory Usage"
+          <SystemCard
+            title="Memory Usage"
               value={system.memory?.display || system.memory || '0GB / 0GB'}
               status={getStatusFromValue(system.memory?.usagePercent || 0)}
-              icon="💾"
+            icon="💾"
               subtitle={`${system.memory?.usagePercent || 0}% used`}
-            >
-              <MetricChart
+          >
+            <MetricChart
                 value={system.memory?.usagePercent || 0}
-                label="Memory"
-              />
-            </SystemCard>
+              label="Memory"
+            />
+          </SystemCard>
           </motion.div>
 
           <motion.div
@@ -313,20 +281,20 @@ const SystemMonitoring = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3 }}
           >
-            <SystemCard
-              title="Disk Usage"
+          <SystemCard
+            title="Disk Usage"
               value={system.diskUsage?.display || system.diskUsage || 'N/A'}
               status={getStatusFromValue(system.diskUsage?.usagePercent || 0)}
-              icon="💿"
+            icon="💿"
               subtitle={`${system.diskUsage?.usagePercent || 0}% • ${system.diskUsage?.filesystem || 'N/A'}`}
-            >
+          >
               {system.diskUsage?.usagePercent !== undefined && (
-                <MetricChart
+            <MetricChart
                   value={system.diskUsage.usagePercent}
-                  label="Disk"
-                />
+              label="Disk"
+            />
               )}
-            </SystemCard>
+          </SystemCard>
           </motion.div>
 
           <motion.div
@@ -334,13 +302,13 @@ const SystemMonitoring = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <SystemCard
-              title="API Latency"
+          <SystemCard
+            title="API Latency"
               value={`${api.avgResponseTimeMs || 0}ms`}
               status={getStatusFromValue(api.avgResponseTimeMs, { critical: 500, warning: 300 })}
-              icon="🌐"
+            icon="🌐"
               subtitle={`${api.requestsLastMinute || 0} req/min • ${api.errorRatePercent || 0}% errors`}
-            />
+          />
           </motion.div>
 
           <motion.div
@@ -348,11 +316,11 @@ const SystemMonitoring = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5 }}
           >
-            <SystemCard
-              title="Database Latency"
+          <SystemCard
+            title="Database Latency"
               value={`${database.latencyMs || 0}ms`}
               status={getStatusFromValue(database.latencyMs, { critical: 200, warning: 100 })}
-              icon="🗄️"
+            icon="🗄️"
               subtitle={`${database.status || 'UNKNOWN'} • ${database.collectionsCount || 0} collections`}
             />
           </motion.div>
@@ -362,11 +330,11 @@ const SystemMonitoring = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.6 }}
           >
-            <SystemCard
-              title="System Uptime"
+          <SystemCard
+            title="System Uptime"
               value={system.uptime || app.uptime || 'N/A'}
-              status="healthy"
-              icon="✅"
+            status="healthy"
+            icon="✅"
               subtitle={`${app.environment || 'N/A'} • ${system.hostname || 'N/A'}`}
             />
           </motion.div>
@@ -461,6 +429,7 @@ const SystemMonitoring = () => {
               />
               <div className="mt-4 space-y-2">
                 {Object.entries(externalServices).map(([key, value]) => {
+                  if (key === 'summary') return null;
                   const status = value?.status || value || 'UNKNOWN';
                   return (
                     <div key={key} className="flex items-center justify-between text-sm">
@@ -478,6 +447,11 @@ const SystemMonitoring = () => {
                   );
                 })}
               </div>
+              <div className="mt-3 text-xs text-theme-secondary">
+                {externalSummary.servicesTotal > 0
+                  ? `${externalSummary.servicesOnline} of ${externalSummary.servicesTotal} services online (${externalSummary.percentageOnline}%)`
+                  : 'No external services configured.'}
+              </div>
             </motion.div>
           )}
         </div>
@@ -486,10 +460,7 @@ const SystemMonitoring = () => {
         <MaintenanceActions onActionComplete={handleActionComplete} />
 
         {/* System Logs */}
-        <LogViewer 
-          logs={logs} 
-          onClear={handleClearLogs}
-        />
+        <SystemLogsPanel />
       </div>
     </AdminLayout>
   );

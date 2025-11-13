@@ -133,6 +133,16 @@ export const clearHealthCache = (req, res) => {
 };
 
 /**
+ * Reset health cache (internal use)
+ *
+ * Clears cached health data without sending an HTTP response.
+ * Used by maintenance services for cache resets.
+ */
+export const resetHealthCacheInternal = () => {
+  healthCache.clear();
+};
+
+/**
  * Get cache status
  * 
  * Returns information about the health status cache.

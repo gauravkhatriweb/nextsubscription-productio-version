@@ -1,0 +1,120 @@
+### ROLE
+
+You are a **senior backend engineer and software architect** responsible for optimizing the **Next Subscription backend system** (Node.js + Express + MongoDB + Mongoose).
+Your goal is to **analyze, refactor, and document** the backend to make it more efficient, maintainable, and production-ready — **without breaking any existing functionality**.
+
+---
+
+### OBJECTIVE
+
+To make the backend cleaner, faster, and easier to scale, while preserving its current features and performance accuracy.
+
+---
+
+### PHASE 1 — ANALYSIS & OPTIMIZATION
+
+#### 🧠 1. Understand and Analyze the Backend
+
+* Carefully scan the backend folder structure:
+
+  ```
+  /backend
+  ├── config/
+  ├── controllers/
+  ├── models/
+  ├── routes/
+  ├── middleware/
+  ├── services/
+  ├── utils/
+  ├── logs/
+  ├── index.js or server.js
+  ```
+* Identify:
+
+  * Duplicate or overlapping functions in controllers/services.
+  * Any unused imports, variables, or modules.
+  * Repetitive database queries that can be refactored into reusable helpers.
+  * Redundant routes or logic that can be merged.
+  * Old testing routes or temporary code left from development.
+
+#### ⚙️ 2. Optimize Backend Code Efficiency
+
+Use industry-level techniques while preserving behavior:
+
+* Replace repetitive callbacks with **async/await** structure.
+* Introduce **caching layer (e.g., Node Cache or Redis)** for frequently accessed endpoints.
+* Optimize **MongoDB queries**:
+
+  * Add missing indexes where necessary.
+  * Use `lean()` on read-only queries.
+  * Avoid unnecessary `populate()` calls.
+* Consolidate similar controller functions (e.g., `createVendor`, `addVendor`) into single, modularized versions.
+* Move environment-sensitive logic into **`.env`** with fallbacks and proper validation via **dotenv-safe**.
+
+#### 🧩 3. Remove Inefficient or Unused Code
+
+* Detect and remove:
+
+  * Deprecated functions or features no longer called.
+  * Unused middleware and routes.
+  * Hardcoded data or static JSON mocks.
+* Keep complete **functional parity** — no feature should be broken.
+* If something is uncertain, mark it with a comment:
+
+  ```js
+  // TODO: Verify if this function is still needed (legacy vendor import handler)
+  ```
+
+#### 🧾 4. Add Comprehensive Inline Comments
+
+Every file and function must include meaningful, developer-friendly comments:
+
+```js
+// CONTROLLER: Handles vendor authentication and password reset
+// FIX: Optimized password hashing and streamlined MongoDB query
+```
+
+At the top of each file, include a header comment:
+
+```js
+/**
+ * FILE: vendorController.js
+ * PURPOSE: Manage vendor registration, authentication, and credential handling.
+ * AUTHOR: Next Subscription Engineering
+ * UPDATED: 2025-11-14
+ */
+```
+
+#### 🧱 5. Follow Modern Node.js Standards
+
+* Use **ES6 imports/exports** instead of `require()` when applicable.
+* Apply **Prettier + ESLint** configurations for clean, consistent syntax.
+* Introduce **centralized error handling** (e.g., `/middleware/errorHandler.js`).
+* Utilize **HTTP status constants** from a single helper file for readability.
+
+#### 🚀 6. Optimize Performance & Scalability
+
+* Ensure **graceful shutdown handling** for DB connections.
+* Integrate **compression middleware** for optimized responses.
+* Implement **rate limiting** and **helmet.js** for security hardening.
+* Move any repetitive logic to **services** and **helpers**.
+
+#### 📚 7. Generate a To-Do List Before Execution
+
+Tell the AI to automatically generate a To-Do checklist:
+
+1. Scan backend for duplicate logic and inefficiencies.
+2. Identify dead code or unused modules.
+3. Plan folder restructuring strategy.
+4. Review MongoDB schema usage and simplify.
+5. Prepare documentation template.
+6. Review third-party dependencies for cleanup.
+
+After the To-Do is ready, proceed step-by-step through the backend, validating each change before execution.
+
+#### ✅ Expected Outcome
+
+* All redundant code removed, no functionality lost.
+* Backend runs faster and cleaner.
+* Developers can easily read and understand code via comments.
+* System ready for production deployment with optimized performance.

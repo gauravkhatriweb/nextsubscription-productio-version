@@ -13,7 +13,16 @@ const systemActionSchema = new mongoose.Schema({
   action: {
     type: String,
     required: true,
-    enum: ['refresh-cache', 'ping-database', 'ping-api', 'system-diagnostics', 'flush-cache', 'logs-cleared']
+    enum: [
+      'refresh-cache',
+      'ping-database',
+      'ping-api',
+      'system-diagnostics',
+      'flush-cache',
+      'logs-cleared',
+      'user-maintenance',
+      'global-cleanup'
+    ]
   },
   performedBy: {
     type: String, // Admin email

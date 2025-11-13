@@ -1,0 +1,155 @@
+### ROLE
+
+You are a **senior backend + frontend systems engineer** working on **Next Subscription’s System Monitoring and Maintenance module**.
+Your mission is to **make all maintenance routes, terminal logs, and log archival fully functional, production-grade, and visually engaging** using real data and real backend logic.
+
+---
+
+### OBJECTIVES
+
+1. Fix missing maintenance endpoints.
+2. Implement full functionality for user, cache, and system maintenance.
+3. Add **real-time system terminal with text animation** for logs using ShadCN + Motion.
+4. Enable **daily archived logs** (saved and viewable).
+5. Introduce **new maintenance controls** that provide real, useful server-level utilities.
+6. Ensure all operations are safe, auditable, and production-ready.
+
+---
+
+### STEP-BY-STEP ACTION PLAN
+
+#### 🧠 1. Understand Current Backend Maintenance Structure
+
+* Review `/backend/routes/admin/system.js` or `/backend/routes/systemMonitoring.js`.
+* Locate the `maintenance` route group — expected paths:
+
+  ```
+  /api/admin/system/maintenance/users
+  /api/admin/system/maintenance/cache
+  /api/admin/system/maintenance/all
+  ```
+* Check the corresponding controller (likely `systemController.js` or `maintenanceController.js`).
+* Identify why these routes return **404 Not Found** — missing route registration, incorrect method, or missing controller binding.
+
+---
+
+#### ⚙️ 2. Fix and Implement Maintenance Endpoints
+
+Implement (or verify) the following backend routes with real operational logic:
+
+1. **`GET /api/admin/system/maintenance/users`**
+
+   * Returns user-related stats: total users, active users, vendors, suspended accounts.
+   * Add optional `?cleanup=true` query to remove inactive users if triggered via Maintenance Control.
+
+2. **`POST /api/admin/system/maintenance/cache`**
+
+   * Clears all cached files, Redis, or Node cache (depending on the setup).
+   * Return JSON summary `{ success: true, clearedKeys: N, memoryFreed: X MB }`.
+
+3. **`POST /api/admin/system/maintenance/all`**
+
+   * Combines user cleanup, cache reset, and old log archiving in one command.
+   * Must be asynchronous and safe — use background worker or promise chain.
+
+---
+
+#### 🧰 3. Add More Real Maintenance Controls
+
+Expand the Maintenance Control tab with **useful production tools** (real backend logic required):
+
+* **Rebuild System Indexes:**
+  Run `db.collection.reIndex()` for all MongoDB collections.
+
+* **Check Storage Health:**
+  Returns disk usage, free space, and recent storage activity.
+
+* **Restart Node Worker / Background Jobs:**
+  Trigger controlled restart of worker processes using PM2 or Node’s cluster API.
+
+* **Purge Expired Sessions:**
+  Clean session store entries older than X days.
+
+* **Log Rotation:**
+  Archive logs older than 7 days into `/logs/archives/yyyy-mm-dd.json` and clear from active file.
+
+Each control should show:
+
+* Description
+* Status icon (Active, Idle, Failed)
+* “Run Now” button with loading state
+* Confirmation modal before running destructive operations.
+
+---
+
+#### 💾 4. Implement System Log Terminal Enhancements
+
+Use **ShadCN Terminal Component** + **Motion** for a visually dynamic terminal:
+
+* Each log entry should “type in” with a delay for a real-time feel.
+* Use gradient text animation for timestamps.
+* Color-code log levels (INFO: green, WARN: yellow, ERROR: red).
+* Add “📜 View Archived Logs” button to open a modal of old log files sorted by date.
+
+##### Log Archival Logic
+
+* On **Clear Logs**, current logs should be:
+
+  1. Saved in `/logs/archives/DATE_TIME.json` (backend).
+  2. Removed from active logs in frontend view.
+  3. Added to an “Archived Logs” view tab for later access.
+
+##### Log Structure Example:
+
+```json
+{
+  "timestamp": "2025-11-13T18:45:32Z",
+  "level": "INFO",
+  "message": "Cache cleared successfully.",
+  "initiatedBy": "admin@example.com"
+}
+```
+
+---
+
+#### 🔒 5. Ensure Safety and Real Data Usage
+
+* All routes must verify **admin authentication** using middleware.
+* No dummy or placeholder data anywhere — everything must pull from real backend stats.
+* Use `os` module for CPU, memory, and disk insights.
+* Use Mongoose’s `connection.readyState` for DB connectivity.
+
+---
+
+#### 🧩 6. Frontend Integration (System Monitoring Page)
+
+In `/frontend/admin/systemMonitoring/`:
+
+* Integrate the repaired API routes.
+* Add buttons for each Maintenance Control (trigger via Axios POST).
+* Use glass-effect cards for each control (consistent with brand theme).
+* Add “Terminal Logs” component to visualize log streaming and archival access.
+* Add “Archived Logs” tab or modal to browse past logs by date.
+
+---
+
+#### 🧾 7. To-Do List (AI Execution Order)
+
+1. Scan backend for `/api/admin/system/maintenance` route group.
+2. Add missing controllers and connect endpoints properly.
+3. Implement all real maintenance utilities (users, cache, all).
+4. Connect frontend Maintenance Controls to new APIs.
+5. Add animated Terminal component and link it with real logs.
+6. Create and store archived logs daily under `/logs/archives/`.
+7. Test full functionality end-to-end — including clear, archive, and retrieval flows.
+
+---
+
+### ✅ FINAL EXPECTATION
+
+* All `/api/admin/system/maintenance/*` endpoints working and tested.
+* Maintenance Control panel functional and meaningful.
+* Terminal Logs animated and showing real system data.
+* Archived logs saved, viewable, and safely retrievable by date.
+* No dummy data — only real production-ready metrics.
+* 100% clean integration between backend and frontend.

@@ -63,7 +63,7 @@ export const getHealthStatus = async (bypassCache = false, useAdminEndpoint = fa
  * @param {number} limit - Maximum number of logs to return
  * @returns {Promise<Array>} Array of log entries
  */
-export const getSystemLogs = async (limit = 50) => {
+export const getSystemLogs = async ({ limit = 100 } = {}) => {
   try {
     const response = await axios.get(`${apiBase}/api/admin/system/logs`, {
       withCredentials: true,
@@ -79,6 +79,61 @@ export const getSystemLogs = async (limit = 50) => {
     return [];
   } catch (error) {
     console.error('System logs error:', error);
+    return [];
+  }
+};
+
+/**
+ * Get system logs for a specific date (archived)
+ *
+ * @param {string} date - YYYY-MM-DD
+ * @param {number} limit - Max entries
+ * @returns {Promise<Array>}
+ */
+export const getSystemLogsByDate = async (date, limit = 500) => {
+  if (!date) {
+    return [];
+  }
+
+  try {
+    const response = await axios.get(`${apiBase}/api/admin/system/logs/${date}`, {
+      withCredentials: true,
+      params: { limit },
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.data.success) {
+      return response.data.logs || [];
+    }
+    return [];
+  } catch (error) {
+    console.error('Archived system logs error:', error);
+    return [];
+  }
+};
+
+/**
+ * Get available log dates
+ *
+ * @returns {Promise<Array<string>>}
+ */
+export const getAvailableLogDates = async () => {
+  try {
+    const response = await axios.get(`${apiBase}/api/admin/system/logs-dates`, {
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.data.success) {
+      return response.data.dates || [];
+    }
+    return [];
+  } catch (error) {
+    console.error('Log dates error:', error);
     return [];
   }
 };
@@ -218,13 +273,91 @@ export const runSystemDiagnostics = async () => {
   }
 };
 
+/**
+ * Maintenance: Flush caches
+ */
+export const maintenanceCache = async () => {
+  try {
+    const response = await axios.post(
+      `${apiBase}/api/admin/system/maintenance/cache`,
+      {},
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Maintenance cache error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Maintenance: User cleanup
+ *
+ * @param {Object} payload - Cleanup options
+ */
+export const maintenanceUsers = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${apiBase}/api/admin/system/maintenance/users`,
+      payload,
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Maintenance users error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Maintenance: Global cleanup
+ *
+ * @param {Object} payload - Cleanup options
+ */
+export const maintenanceGlobal = async (payload) => {
+  try {
+    const response = await axios.post(
+      `${apiBase}/api/admin/system/maintenance/all`,
+      payload,
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Maintenance global error:', error);
+    throw error;
+  }
+};
+
 export default {
   getHealthStatus,
   getSystemLogs,
+  getSystemLogsByDate,
+  getAvailableLogDates,
   clearSystemLogs,
   refreshCache,
   pingDatabase,
   pingApiEndpoints,
-  runSystemDiagnostics
+  runSystemDiagnostics,
+  maintenanceCache,
+  maintenanceUsers,
+  maintenanceGlobal
 };
 

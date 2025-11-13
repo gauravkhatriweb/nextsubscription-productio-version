@@ -11,12 +11,19 @@
 import {
   getSystemStatus,
   getSystemLogs,
+  getSystemLogsByDate,
+  getAvailableLogDates,
   clearSystemLogs,
   refreshCache,
   pingDatabase,
   pingApiEndpoints,
   runSystemDiagnostics
 } from '../services/systemMonitoring.service.js';
+import {
+  performCacheMaintenance,
+  cleanupUserData,
+  performGlobalCleanup
+} from '../services/maintenance.service.js';
 import getHealthStatus from '../services/health.service.js';
 
 /**
@@ -70,6 +77,54 @@ export const getSystemLogsController = async (req, res) => {
 };
 
 /**
+ * Controller: Get Archived System Logs
+ *
+ * Returns archived system logs for a specific date.
+ *
+ * @route GET /api/admin/system/logs/:date
+ * @protected (requires admin authentication)
+ */
+export const getSystemLogsByDateController = async (req, res) => {
+  try {
+    const { date } = req.params;
+    const limit = parseInt(req.query.limit) || 500;
+    const logs = await getSystemLogsByDate(date, limit);
+    return res.status(200).json({
+      success: true,
+      logs
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to get archived system logs'
+    });
+  }
+};
+
+/**
+ * Controller: Get Available Log Dates
+ *
+ * Returns list of available archived log dates.
+ *
+ * @route GET /api/admin/system/logs-dates
+ * @protected (requires admin authentication)
+ */
+export const getAvailableLogDatesController = async (req, res) => {
+  try {
+    const dates = await getAvailableLogDates();
+    return res.status(200).json({
+      success: true,
+      dates
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to get log dates'
+    });
+  }
+};
+
+/**
  * Controller: Clear System Logs
  * 
  * Clears system logs (marks them as cleared).
@@ -115,6 +170,79 @@ export const refreshCacheController = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to refresh cache'
+    });
+  }
+};
+
+/**
+ * Controller: Maintenance - Cache Cleanup
+ *
+ * @route POST /api/admin/system/maintenance/cache
+ * @protected
+ */
+export const maintenanceCacheController = async (req, res) => {
+  try {
+    const adminEmail = req.admin?.email || null;
+    const ipAddress = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for']?.split(',')[0] || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
+
+    const result = await performCacheMaintenance(adminEmail, { ipAddress, userAgent });
+    return res.status(200).json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Cache maintenance failed'
+    });
+  }
+};
+
+/**
+ * Controller: Maintenance - User Cleanup
+ *
+ * @route POST /api/admin/system/maintenance/users
+ * @protected
+ */
+export const maintenanceUsersController = async (req, res) => {
+  try {
+    const adminEmail = req.admin?.email || null;
+    const options = req.body || {};
+
+    const result = await cleanupUserData(adminEmail, options);
+    return res.status(200).json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message || 'User maintenance failed'
+    });
+  }
+};
+
+/**
+ * Controller: Maintenance - Global Cleanup
+ *
+ * @route POST /api/admin/system/maintenance/all
+ * @protected
+ */
+export const maintenanceGlobalController = async (req, res) => {
+  try {
+    const adminEmail = req.admin?.email || null;
+    const options = req.body || {};
+
+    const result = await performGlobalCleanup(adminEmail, options);
+    return res.status(200).json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Global cleanup failed'
     });
   }
 };

@@ -12,6 +12,12 @@ import path from 'path';
 import { performance } from 'node:perf_hooks';
 import mongoose from 'mongoose';
 import SystemActionModel from '../models/systemAction.model.js';
+import {
+  writeSystemLog,
+  readRecentSystemLogs,
+  readSystemLogsByDate,
+  listAvailableLogDates
+} from '../utils/logger.js';
 
 /**
  * Get System Status
@@ -151,34 +157,62 @@ export const getSystemStatus = async () => {
  * @param {number} limit - Number of logs to return
  * @returns {Promise<Array>} Array of log entries
  */
-export const getSystemLogs = async (limit = 50) => {
+export const getSystemLogs = async (limit = 100) => {
   try {
-    // Get the last cleared timestamp from a special marker document
-    const clearedMarker = await SystemActionModel.findOne({ action: 'logs-cleared' })
-      .sort({ createdAt: -1 })
-      .lean();
-    
-    const query = {};
-    if (clearedMarker) {
-      // Only return logs created after the last clear
-      query.createdAt = { $gt: clearedMarker.createdAt };
+    // LOGS: Read live logs from today's file
+    const entries = await readRecentSystemLogs(limit);
+
+    // Fallback to SystemAction collection for additional context if file empty
+    if (entries.length === 0) {
+      const recentActions = await SystemActionModel.find({})
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .lean();
+
+      return recentActions.map(action => ({
+        timestamp: action.createdAt,
+        level: action.status === 'success' ? 'info' : action.status === 'failed' ? 'error' : 'warn',
+        message: `${action.action} - ${action.status}`,
+        source: 'maintenance',
+        meta: action.result || null
+      }));
     }
-    
-    // In a real system, this would query from a logging service
-    // For now, return recent system actions as logs
-    const recentActions = await SystemActionModel.find(query)
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .lean();
-    
-    return recentActions.map(action => ({
-      timestamp: action.createdAt,
-      level: action.status === 'success' ? 'info' : 'error',
-      message: `${action.action} - ${action.status}`,
-      details: action.result
-    }));
+
+    return entries;
   } catch (error) {
     console.error('Error getting system logs:', error);
+    return [];
+  }
+};
+
+/**
+ * Get system logs for a specific date (archived view).
+ *
+ * @param {string} dateStr - YYYY-MM-DD
+ * @param {number} limit - Limit records
+ * @returns {Promise<Array>}
+ */
+export const getSystemLogsByDate = async (dateStr, limit = 500) => {
+  try {
+    // LOGS: Read archived logs from disk
+    const entries = await readSystemLogsByDate(dateStr, limit);
+    return entries;
+  } catch (error) {
+    console.error('Error getting archived system logs:', error);
+    return [];
+  }
+};
+
+/**
+ * List available archived log dates.
+ *
+ * @returns {Promise<Array<string>>}
+ */
+export const getAvailableLogDates = async () => {
+  try {
+    return await listAvailableLogDates();
+  } catch (error) {
+    console.error('Error listing log dates:', error);
     return [];
   }
 };
@@ -200,6 +234,13 @@ export const clearSystemLogs = async (adminEmail) => {
       status: 'success',
       result: { message: 'System logs cleared', timestamp: new Date().toISOString() }
     });
+
+    await writeSystemLog({
+      level: 'info',
+      source: 'maintenance',
+      message: 'System logs clear marker created',
+      meta: { performedBy: adminEmail }
+    });
     
     return {
       success: true,
@@ -207,6 +248,12 @@ export const clearSystemLogs = async (adminEmail) => {
     };
   } catch (error) {
     console.error('Error clearing system logs:', error);
+    await writeSystemLog({
+      level: 'error',
+      source: 'maintenance',
+      message: 'Failed to clear system logs',
+      meta: { error: error.message, performedBy: adminEmail }
+    });
     throw error;
   }
 };
@@ -236,6 +283,13 @@ export const refreshCache = async (adminEmail) => {
       result: { message: 'Cache flushed successfully' },
       executionTime
     });
+
+    await writeSystemLog({
+      level: 'info',
+      source: 'maintenance',
+      message: 'Cache refreshed successfully',
+      meta: { executionTime, performedBy: adminEmail }
+    });
     
     return {
       success: true,
@@ -250,6 +304,13 @@ export const refreshCache = async (adminEmail) => {
       status: 'failed',
       result: { error: error.message },
       executionTime
+    });
+
+    await writeSystemLog({
+      level: 'error',
+      source: 'maintenance',
+      message: 'Cache refresh failed',
+      meta: { error: error.message, performedBy: adminEmail }
     });
     throw error;
   }
@@ -280,6 +341,13 @@ export const pingDatabase = async (adminEmail) => {
       result: { latency: `${pingTime}ms`, connected: true },
       executionTime
     });
+
+    await writeSystemLog({
+      level: 'info',
+      source: 'maintenance',
+      message: 'Database ping succeeded',
+      meta: { latency: `${pingTime}ms`, performedBy: adminEmail }
+    });
     
     return {
       success: true,
@@ -296,6 +364,13 @@ export const pingDatabase = async (adminEmail) => {
       status: 'failed',
       result: { error: error.message, connected: false },
       executionTime
+    });
+
+    await writeSystemLog({
+      level: 'error',
+      source: 'maintenance',
+      message: 'Database ping failed',
+      meta: { error: error.message, performedBy: adminEmail }
     });
     throw error;
   }
@@ -343,6 +418,13 @@ export const pingApiEndpoints = async (adminEmail) => {
       result: { endpoints: results },
       executionTime
     });
+
+    await writeSystemLog({
+      level: 'info',
+      source: 'maintenance',
+      message: 'API endpoints check completed',
+      meta: { endpoints: results, performedBy: adminEmail }
+    });
     
     return {
       success: true,
@@ -358,6 +440,13 @@ export const pingApiEndpoints = async (adminEmail) => {
       status: 'failed',
       result: { error: error.message },
       executionTime
+    });
+
+    await writeSystemLog({
+      level: 'error',
+      source: 'maintenance',
+      message: 'API endpoints check failed',
+      meta: { error: error.message, performedBy: adminEmail }
     });
     throw error;
   }
@@ -391,6 +480,13 @@ export const runSystemDiagnostics = async (adminEmail) => {
       result: diagnostics,
       executionTime
     });
+
+    await writeSystemLog({
+      level: 'info',
+      source: 'maintenance',
+      message: 'System diagnostics completed',
+      meta: { diagnostics, performedBy: adminEmail }
+    });
     
     return {
       success: true,
@@ -406,6 +502,13 @@ export const runSystemDiagnostics = async (adminEmail) => {
       status: 'failed',
       result: { error: error.message },
       executionTime
+    });
+
+    await writeSystemLog({
+      level: 'error',
+      source: 'maintenance',
+      message: 'System diagnostics failed',
+      meta: { error: error.message, performedBy: adminEmail }
     });
     throw error;
   }

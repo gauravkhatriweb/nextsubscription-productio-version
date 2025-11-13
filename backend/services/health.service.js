@@ -523,7 +523,19 @@ export const getExternalServicesStatus = async () => {
   // HEALTH: Run all service checks concurrently
   await Promise.allSettled(checks);
 
-  return services;
+  const serviceEntries = Object.entries(services);
+  const monitoredServices = serviceEntries.filter(([_, value]) => value && value.status && value.status !== 'NOT_CONFIGURED');
+  const servicesTotal = monitoredServices.length;
+  const servicesOnline = monitoredServices.filter(([_, value]) => value.status === 'UP').length;
+
+  return {
+    ...services,
+    summary: {
+      servicesOnline,
+      servicesTotal,
+      percentageOnline: servicesTotal > 0 ? Math.round((servicesOnline / servicesTotal) * 100) : 0
+    }
+  };
 };
 
 /**
