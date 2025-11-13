@@ -17,26 +17,30 @@ import {
   pingApiEndpoints,
   runSystemDiagnostics
 } from '../services/systemMonitoring.service.js';
+import getHealthStatus from '../services/health.service.js';
 
 /**
  * Controller: Get System Status
  * 
- * Returns current system metrics.
+ * Returns current system metrics using the comprehensive health service.
  * 
  * @route GET /api/admin/system/status
  * @protected (requires admin authentication)
  */
 export const getSystemStatusController = async (req, res) => {
   try {
-    const status = await getSystemStatus();
+    // MONITORING: Use comprehensive health service for system status
+    const healthStatus = await getHealthStatus();
     return res.status(200).json({
       success: true,
-      data: status
+      data: healthStatus
     });
   } catch (error) {
+    console.error('System status error:', error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to get system status'
+      message: 'Failed to get system status',
+      error: error.message
     });
   }
 };

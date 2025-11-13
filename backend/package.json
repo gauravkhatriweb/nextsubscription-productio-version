@@ -11,7 +11,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.3",
     "multer": "^2.0.2",
-    "nodemailer": "^7.0.10"
+    "nodemailer": "^7.0.10",
+    "systeminformation": "^5.27.11"
   },
   "name": "backend",
   "version": "1.0.0",

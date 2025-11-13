@@ -22,6 +22,12 @@ import adminStockRequestRoutes from './routes/admin.stockRequests.route.js';
 import adminSettingsRoutes from './routes/admin.settings.route.js';
 import adminSystemRoutes from './routes/admin.system.route.js';
 
+// Import health controller
+import { getHealth } from './controllers/health.controller.js';
+
+// Import metrics middleware
+import metricsMiddleware from './middleware/metrics.middleware.js';
+
 dotenv.config();
 
 const app = express();
@@ -54,6 +60,9 @@ app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
 
+// HEALTH: Add metrics middleware to track API requests
+app.use(metricsMiddleware);
+
 app.use('/uploads', express.static('uploads'));
 
 // API Routes
@@ -85,33 +94,10 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/health', async (req, res) => {
-  try {
-    const health = {
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      environment: NODE_ENV
-    };
-
-    try {
-      await mongoose.connection.db.admin().ping();
-      health.mongodb = 'connected';
-    } catch (error) {
-      health.mongodb = 'disconnected';
-      health.status = 'degraded';
-    }
-
-    const statusCode = health.status === 'ok' ? 200 : 503;
-    res.status(statusCode).json(health);
-  } catch (error) {
-    res.status(503).json({
-      status: 'error',
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+// Health check endpoints
+// HEALTH: Comprehensive health monitoring endpoint
+app.get('/api/health', getHealth);
+app.get('/health', getHealth); // Backward compatibility
 
 
 
@@ -219,7 +205,7 @@ const startServer = async () => {
    • Environment: ${NODE_ENV}
    • Port: ${PORT}
    • URL: http://localhost:${PORT}
-   • Health Check: http://localhost:${PORT}/
+   • Health Check: http://localhost:${PORT}/health
    • Timestamp: ${new Date().toISOString()}\n`);
     });
   } catch (error) {
