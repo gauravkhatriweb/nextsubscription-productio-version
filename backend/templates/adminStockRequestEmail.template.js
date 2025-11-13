@@ -1,7 +1,7 @@
 /**
  * Admin Stock Request Email Template
  * 
- * Email template for notifying vendors about admin stock requests.
+ * Email template for notifying vendor about admin stock requests.
  * 
  * @author Gaurav Khatri
  * @version 1.0

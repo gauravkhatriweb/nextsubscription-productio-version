@@ -58,11 +58,11 @@ import ContentPage from './pages/admin/settings/ContentPage'
 import ThemePage from './pages/admin/settings/ThemePage'
 import PreviewPage from './pages/admin/settings/PreviewPage'
 import SystemMonitoring from './pages/admin/system-monitoring/SystemMonitoring'
-import VendorsList from './pages/admin/vendors/VendorsList'
-import VendorCreate from './pages/admin/vendors/VendorCreate'
-import VendorDetail from './pages/admin/vendors/VendorDetail'
+import VendorList from './pages/admin/vendor/VendorList'
+import VendorCreate from './pages/admin/vendor/VendorCreate'
+import VendorDetail from './pages/admin/vendor/VendorDetail'
 import ProductRequestsQueue from './pages/admin/productRequests/ProductRequestsQueue'
-import AdminStockRequest from './pages/admin/vendors/AdminStockRequest'
+import AdminStockRequest from './pages/admin/vendor/AdminStockRequest'
 import AdminStockRequestsList from './pages/admin/productRequests/AdminStockRequestsList'
 
 // Vendor Pages
@@ -121,16 +121,16 @@ const App = () => {
           <Route path="/admin/settings/theme" element={<ThemePage />} />
           <Route path="/admin/settings/preview" element={<PreviewPage />} />
           <Route path="/admin/monitoring" element={<SystemMonitoring />} />
-          <Route path="/admin/vendors" element={<VendorsList />} />
-          <Route path="/admin/vendors/create" element={<VendorCreate />} />
-          <Route path="/admin/vendors/:id" element={<VendorDetail />} />
-          <Route path="/admin/vendors/:vendorId/requests/new" element={<AdminStockRequest />} />
+          <Route path="/admin/vendor" element={<VendorList />} />
+          <Route path="/admin/vendor/create" element={<VendorCreate />} />
+          <Route path="/admin/vendor/:id" element={<VendorDetail />} />
+          <Route path="/admin/vendor/:vendorId/requests/new" element={<AdminStockRequest />} />
           <Route path="/admin/requests" element={<ProductRequestsQueue />} />
           <Route path="/admin/stock-requests" element={<AdminStockRequestsList />} />
 
           {/* Vendor Routes */}
           <Route path="/vendor/login" element={<VendorLogin />} />
-          {/* CLEANUP: Removed /vendor/setup route - vendors go directly to dashboard */}
+          {/* CLEANUP: Removed /vendor/setup route - vendor go directly to dashboard */}
           <Route path="/vendor/setup" element={<Navigate to="/vendor/dashboard" replace />} />
           <Route path="/vendor/dashboard" element={<VendorDashboard />} />
           <Route path="/vendor/products" element={<ProductsList />} />

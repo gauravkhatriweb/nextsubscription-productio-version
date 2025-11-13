@@ -12,7 +12,7 @@ import multer from 'multer';
 import {
   vendorLogin,
   getVendorInfo,
-  // changePassword, // REMOVED: Vendors cannot change passwords
+  // changePassword, // REMOVED: vendor cannot change passwords
   updateProfile,
   vendorLogout
 } from '../controllers/vendor.controller.js';
@@ -97,7 +97,7 @@ router.post('/login', rateLimitVendorLogin, vendorLogin);
 // GET /api/vendor/me - Get vendor info
 router.get('/me', verifyVendorJWT, getVendorInfo);
 
-// PUT /api/vendor/change-password - REMOVED: Vendors cannot change passwords (admin-only control)
+// PUT /api/vendor/change-password - REMOVED: vendor cannot change passwords (admin-only control)
 // router.put('/change-password', verifyVendorJWT, changePassword);
 
 // PUT /api/vendor/profile - Update profile (handles multipart/form-data, rate limited)

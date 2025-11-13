@@ -50,7 +50,7 @@ const fetchVendorPassword = async ({ silent = false } = {}) => {
   setPasswordInfo((prev) => ({ ...prev, loading: true }));
 
   try {
-    const response = await axios.get(`${apiBase}/api/admin/vendors/${id}/password`, {
+    const response = await axios.get(`${apiBase}/api/admin/vendor/${id}/password`, {
       withCredentials: true
     });
 
@@ -102,7 +102,7 @@ const handlePasswordModalCopy = () => {
   const fetchVendor = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${apiBase}/api/admin/vendors/${id}`, {
+      const response = await axios.get(`${apiBase}/api/admin/vendor/${id}`, {
         withCredentials: true
       });
 
@@ -120,7 +120,7 @@ const handlePasswordModalCopy = () => {
     }
     } catch (error) {
       toast.error('Failed to load vendor details');
-      navigate('/admin/vendors');
+      navigate('/admin/vendor');
     } finally {
       setLoading(false);
     }
@@ -140,7 +140,7 @@ const handlePasswordModalCopy = () => {
     setActionLoading(prev => ({ ...prev, status: true }));
     try {
       const response = await axios.put(
-        `${apiBase}/api/admin/vendors/${id}/status`,
+        `${apiBase}/api/admin/vendor/${id}/status`,
         {
           status: newStatus,
           ...notificationOptions
@@ -163,7 +163,7 @@ const handlePasswordModalCopy = () => {
     setActionLoading(prev => ({ ...prev, resend: true }));
     try {
       const response = await axios.post(
-        `${apiBase}/api/admin/vendors/${id}/resend-credentials`,
+        `${apiBase}/api/admin/vendor/${id}/resend-credentials`,
         notificationOptions,
         { withCredentials: true }
       );
@@ -192,7 +192,7 @@ const handlePasswordModalCopy = () => {
     setActionLoading(prev => ({ ...prev, reset: true }));
     try {
       const response = await axios.post(
-        `${apiBase}/api/admin/vendors/${id}/reset-password`,
+        `${apiBase}/api/admin/vendor/${id}/reset-password`,
         {},
         { withCredentials: true }
       );
@@ -233,7 +233,7 @@ const handlePasswordModalCopy = () => {
 
   if (loading) {
     return (
-      <AdminLayout currentPage="vendors">
+      <AdminLayout currentPage="vendor">
         <div className="glass-card rounded-3xl p-12 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary mx-auto mb-4"></div>
           <p className="text-theme-secondary">Loading vendor details...</p>
@@ -247,14 +247,14 @@ const handlePasswordModalCopy = () => {
   }
 
   return (
-    <AdminLayout currentPage="vendors">
+    <AdminLayout currentPage="vendor">
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate('/admin/vendors')}
+            onClick={() => navigate('/admin/vendor')}
             className="text-theme-secondary hover:text-theme-primary transition-colors"
           >
-            ← Back to Vendors
+            ← Back to vendor
           </button>
           <h1 className="text-3xl font-bold" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
             {vendor.companyName}
@@ -350,7 +350,7 @@ const handlePasswordModalCopy = () => {
                 </div>
               </div>
               <button
-                onClick={() => navigate(`/admin/vendors/${id}/requests/new`)}
+                onClick={() => navigate(`/admin/vendor/${id}/requests/new`)}
                 className="w-full px-4 py-2.5 rounded-xl font-semibold text-sm bg-brand-primary text-black hover:bg-brand-primary/90 shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
               >
                 <span>📦</span>

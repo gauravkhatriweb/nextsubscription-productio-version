@@ -69,7 +69,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
     { id: 'dashboard', label: 'Dashboard', icon: '🏠', path: '/admin/dashboard' },
     { id: 'settings', label: 'Settings', icon: '⚙️', path: '/admin/settings', hasSubItems: true },
     { id: 'monitoring', label: 'System Monitoring', icon: '🛰️', path: '/admin/monitoring' },
-    { id: 'vendors', label: 'Vendors', icon: '🏢', path: '/admin/vendors' }
+    { id: 'vendor', label: 'Vendor', icon: '🏢', path: '/admin/vendor' }
   ];
 
   // NAV: Settings sub-tabs
@@ -85,7 +85,7 @@ const AdminLayout = ({ children, currentPage = 'dashboard' }) => {
     if (item.id === 'dashboard' && location.pathname === '/admin/dashboard') return true;
     if (item.id === 'settings' && location.pathname.startsWith('/admin/settings')) return true;
     if (item.id === 'monitoring' && location.pathname.startsWith('/admin/monitoring')) return true;
-    if (item.id === 'vendors' && location.pathname.startsWith('/admin/vendors')) return true;
+    if (item.id === 'vendor' && location.pathname.startsWith('/admin/vendor')) return true;
     return false;
   };
 

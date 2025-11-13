@@ -1,7 +1,7 @@
 /**
  * Vendor Team Controller
  * 
- * Handles team member management for vendors.
+ * Handles team member management for vendor.
  * 
  * @author Gaurav Khatri
  * @version 1.0

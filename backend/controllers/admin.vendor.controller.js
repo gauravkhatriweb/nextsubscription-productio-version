@@ -10,10 +10,10 @@
 
 import {
   createVendor,
-  getVendors,
+  getvendor,
   getVendorById,
   updateVendor,
-  updateVendorStatus,
+  updatevendortatus,
   resendCredentials,
   resetVendorPassword,
   getVendorPasswordForAdmin
@@ -22,7 +22,7 @@ import {
 /**
  * Create Vendor
  * 
- * @route POST /api/admin/vendors
+ * @route POST /api/admin/vendor
  */
 export const createVendorController = async (req, res) => {
   try {
@@ -60,28 +60,28 @@ export const createVendorController = async (req, res) => {
 };
 
 /**
- * Get Vendors List
+ * Get vendor List
  * 
- * @route GET /api/admin/vendors
+ * @route GET /api/admin/vendor
  */
-export const getVendorsController = async (req, res) => {
+export const getvendorController = async (req, res) => {
   try {
     const filters = {
       status: req.query.status,
       search: req.query.search
     };
     
-    const vendors = await getVendors(filters);
+    const vendor = await getvendor(filters);
     
     return res.status(200).json({
       success: true,
-      data: vendors,
-      count: vendors.length
+      data: vendor,
+      count: vendor.length
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: 'Failed to fetch vendors'
+      message: 'Failed to fetch vendor'
     });
   }
 };
@@ -89,7 +89,7 @@ export const getVendorsController = async (req, res) => {
 /**
  * Get Vendor by ID
  * 
- * @route GET /api/admin/vendors/:id
+ * @route GET /api/admin/vendor/:id
  */
 export const getVendorByIdController = async (req, res) => {
   try {
@@ -111,7 +111,7 @@ export const getVendorByIdController = async (req, res) => {
 /**
  * Get Vendor Password (Admin Only)
  *
- * @route GET /api/admin/vendors/:id/password
+ * @route GET /api/admin/vendor/:id/password
  */
 export const getVendorPasswordController = async (req, res) => {
   try {
@@ -141,7 +141,7 @@ export const getVendorPasswordController = async (req, res) => {
 /**
  * Update Vendor
  * 
- * @route PUT /api/admin/vendors/:id
+ * @route PUT /api/admin/vendor/:id
  */
 export const updateVendorController = async (req, res) => {
   try {
@@ -168,9 +168,9 @@ export const updateVendorController = async (req, res) => {
 /**
  * Update Vendor Status
  * 
- * @route PUT /api/admin/vendors/:id/status
+ * @route PUT /api/admin/vendor/:id/status
  */
-export const updateVendorStatusController = async (req, res) => {
+export const updatevendortatusController = async (req, res) => {
   try {
     const { id } = req.params;
     const { status, rejectionReason, sendEmail: sendEmailNotification } = req.body;
@@ -186,7 +186,7 @@ export const updateVendorStatusController = async (req, res) => {
     const ipAddress = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for']?.split(',')[0] || 'unknown';
     const userAgent = req.headers['user-agent'] || 'unknown';
     
-    const result = await updateVendorStatus(
+    const result = await updatevendortatus(
       id,
       status,
       adminEmail,
@@ -214,7 +214,7 @@ export const updateVendorStatusController = async (req, res) => {
 /**
  * Resend Credentials
  * 
- * @route POST /api/admin/vendors/:id/resend-credentials
+ * @route POST /api/admin/vendor/:id/resend-credentials
  */
 export const resendCredentialsController = async (req, res) => {
   try {
@@ -250,7 +250,7 @@ export const resendCredentialsController = async (req, res) => {
 /**
  * Reset Vendor Password
  * 
- * @route POST /api/admin/vendors/:id/reset-password
+ * @route POST /api/admin/vendor/:id/reset-password
  */
 export const resetVendorPasswordController = async (req, res) => {
   try {

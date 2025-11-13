@@ -11,10 +11,10 @@
 import express from 'express';
 import {
   createVendorController,
-  getVendorsController,
+  getvendorController,
   getVendorByIdController,
   updateVendorController,
-  updateVendorStatusController,
+  updatevendortatusController,
   resendCredentialsController,
   resetVendorPasswordController,
   getVendorPasswordController
@@ -36,47 +36,47 @@ const router = express.Router();
  * Protected Admin Routes (Requires Admin Authentication)
  */
 
-// POST /api/admin/vendors - Create vendor
+// POST /api/admin/vendor - Create vendor
 router.post('/', verifyAdminJWT, createVendorController);
 
-// GET /api/admin/vendors - List vendors
-router.get('/', verifyAdminJWT, getVendorsController);
+// GET /api/admin/vendor - List vendor
+router.get('/', verifyAdminJWT, getvendorController);
 
-// GET /api/admin/vendors/:id - Get vendor details
+// GET /api/admin/vendor/:id - Get vendor details
 router.get('/:id', verifyAdminJWT, getVendorByIdController);
 
-// GET /api/admin/vendors/:id/password - Retrieve vendor password (admin-only)
+// GET /api/admin/vendor/:id/password - Retrieve vendor password (admin-only)
 router.get('/:id/password', verifyAdminJWT, rateLimitVendorPassword, getVendorPasswordController);
 
-// PUT /api/admin/vendors/:id - Update vendor
+// PUT /api/admin/vendor/:id - Update vendor
 router.put('/:id', verifyAdminJWT, updateVendorController);
 
-// PUT /api/admin/vendors/:id/status - Update vendor status
-router.put('/:id/status', verifyAdminJWT, updateVendorStatusController);
+// PUT /api/admin/vendor/:id/status - Update vendor status
+router.put('/:id/status', verifyAdminJWT, updatevendortatusController);
 
-// POST /api/admin/vendors/:id/resend-credentials - Resend credentials
+// POST /api/admin/vendor/:id/resend-credentials - Resend credentials
 router.post('/:id/resend-credentials', verifyAdminJWT, rateLimitSystemActions, resendCredentialsController);
 
-// POST /api/admin/vendors/:id/reset-password - Reset password
+// POST /api/admin/vendor/:id/reset-password - Reset password
 router.post('/:id/reset-password', verifyAdminJWT, rateLimitSystemActions, resetVendorPasswordController);
 
 // Admin Product Request Routes
-// GET /api/admin/vendors/:vendorId/products - Get vendor's approved products
+// GET /api/admin/vendor/:vendorId/products - Get vendor's approved products
 router.get('/:vendorId/products', verifyAdminJWT, getVendorProducts);
 
-// POST /api/admin/vendors/:vendorId/requests - Create stock request
+// POST /api/admin/vendor/:vendorId/requests - Create stock request
 router.post('/:vendorId/requests', verifyAdminJWT, createAdminProductRequest);
 
-// GET /api/admin/vendors/:vendorId/requests - Get all requests for vendor (or all if vendorId='all')
+// GET /api/admin/vendor/:vendorId/requests - Get all requests for vendor (or all if vendorId='all')
 router.get('/:vendorId/requests', verifyAdminJWT, getAdminProductRequests);
 
-// GET /api/admin/vendors/:vendorId/requests/:id - Get request by ID
+// GET /api/admin/vendor/:vendorId/requests/:id - Get request by ID
 router.get('/:vendorId/requests/:id', verifyAdminJWT, getAdminProductRequestById);
 
-// GET /api/admin/vendors/:vendorId/requests/:id/templates - Get templates
+// GET /api/admin/vendor/:vendorId/requests/:id/templates - Get templates
 router.get('/:vendorId/requests/:id/templates', verifyAdminJWT, getRequestTemplates);
 
-// POST /api/admin/vendors/:vendorId/requests/:id/cancel - Cancel request
+// POST /api/admin/vendor/:vendorId/requests/:id/cancel - Cancel request
 router.post('/:vendorId/requests/:id/cancel', verifyAdminJWT, cancelAdminProductRequest);
 
 export default router;

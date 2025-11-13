@@ -1,7 +1,7 @@
 /**
  * Admin Product Request Controller
  * 
- * Handles admin requests for stock from vendors.
+ * Handles admin requests for stock from vendor.
  * 
  * @author Gaurav Khatri
  * @version 1.0
@@ -53,7 +53,7 @@ Admin - ${adminEmail}`;
 /**
  * Create Admin Product Request
  * 
- * @route POST /api/admin/vendors/:vendorId/requests
+ * @route POST /api/admin/vendor/:vendorId/requests
  */
 export const createAdminProductRequest = async (req, res) => {
   try {
@@ -197,8 +197,8 @@ export const createAdminProductRequest = async (req, res) => {
 /**
  * Get Admin Product Requests
  * 
- * @route GET /api/admin/vendors/:vendorId/requests
- * @route GET /api/admin/stock-requests (all requests across all vendors)
+ * @route GET /api/admin/vendor/:vendorId/requests
+ * @route GET /api/admin/stock-requests (all requests across all vendor)
  */
 export const getAdminProductRequests = async (req, res) => {
   try {
@@ -248,7 +248,7 @@ export const getAdminProductRequests = async (req, res) => {
 /**
  * Get Admin Product Request by ID
  * 
- * @route GET /api/admin/vendors/:vendorId/requests/:id
+ * @route GET /api/admin/vendor/:vendorId/requests/:id
  */
 export const getAdminProductRequestById = async (req, res) => {
   try {
@@ -287,7 +287,7 @@ export const getAdminProductRequestById = async (req, res) => {
 /**
  * Get Vendor Products (Admin)
  * 
- * @route GET /api/admin/vendors/:vendorId/products
+ * @route GET /api/admin/vendor/:vendorId/products
  */
 export const getVendorProducts = async (req, res) => {
   try {
@@ -328,7 +328,7 @@ export const getVendorProducts = async (req, res) => {
 /**
  * Get Templates for Request
  * 
- * @route GET /api/admin/vendors/:vendorId/requests/:id/templates
+ * @route GET /api/admin/vendor/:vendorId/requests/:id/templates
  */
 export const getRequestTemplates = async (req, res) => {
   try {
@@ -380,7 +380,7 @@ export const getRequestTemplates = async (req, res) => {
 /**
  * Cancel Admin Product Request
  * 
- * @route POST /api/admin/vendors/:vendorId/requests/:id/cancel
+ * @route POST /api/admin/vendor/:vendorId/requests/:id/cancel
  */
 export const cancelAdminProductRequest = async (req, res) => {
   try {

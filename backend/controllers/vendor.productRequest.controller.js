@@ -1,7 +1,7 @@
 /**
  * Vendor Product Request Controller
  * 
- * Handles product request submission and management for vendors.
+ * Handles product request submission and management for vendor.
  * 
  * @author Gaurav Khatri
  * @version 1.0

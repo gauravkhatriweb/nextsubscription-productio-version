@@ -58,9 +58,9 @@ app.use('/uploads', express.static('uploads'));
 
 // API Routes
 app.use('/api/users', userRoutes);
-app.use('/api/vendors', vendorRoutes);
+app.use('/api/vendor', vendorRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/admin/vendors', adminVendorRoutes);
+app.use('/api/admin/vendor', adminVendorRoutes);
 app.use('/api/admin/product-requests', adminProductRequestRoutes);
 app.use('/api/admin/stock-requests', adminStockRequestRoutes);
 app.use('/api/admin/settings', adminSettingsRoutes);

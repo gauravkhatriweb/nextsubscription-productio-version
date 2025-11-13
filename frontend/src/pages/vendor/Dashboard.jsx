@@ -1,7 +1,7 @@
 /**
  * Vendor Dashboard
  * 
- * Main dashboard for vendors showing overview stats and quick actions.
+ * Main dashboard for vendor showing overview stats and quick actions.
  * 
  * @component
  */

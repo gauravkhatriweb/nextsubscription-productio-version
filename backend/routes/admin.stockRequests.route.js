@@ -1,7 +1,7 @@
 /**
  * Admin Stock Requests Routes
  * 
- * Routes for viewing all admin stock requests across vendors.
+ * Routes for viewing all admin stock requests across vendor.
  * 
  * @author Gaurav Khatri
  * @version 1.0
@@ -19,7 +19,7 @@ const router = express.Router();
  * Protected Admin Routes (Requires Admin Authentication)
  */
 
-// GET /api/admin/stock-requests - Get all stock requests across all vendors
+// GET /api/admin/stock-requests - Get all stock requests across all vendor
 router.get('/', verifyAdminJWT, (req, res, next) => {
   // Set vendorId to 'all' to fetch all requests
   req.params.vendorId = 'all';

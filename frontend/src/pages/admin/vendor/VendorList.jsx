@@ -1,7 +1,7 @@
 /**
- * Vendors List Component
+ * vendor List Component
  * 
- * Displays list of vendors with search, filters, password display, and WhatsApp templates.
+ * Displays list of vendor with search, filters, password display, and WhatsApp templates.
  * 
  * @component
  * @version 2.2
@@ -14,9 +14,9 @@ import axios from 'axios';
 import AdminLayout from '../../../components/AdminLayout';
 import { getAllTemplates, generateTemplateMessage } from '../../../utils/whatsappTemplates';
 
-const VendorsList = () => {
+const VendorList = () => {
   const navigate = useNavigate();
-  const [vendors, setVendors] = useState([]);
+  const [vendor, setvendor] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -37,26 +37,26 @@ const VendorsList = () => {
   const actionCardClass = 'glass-card flex flex-col justify-between gap-3 min-w-[180px] w-full rounded-xl border border-theme-base/30 bg-theme-surface/60 px-3 py-3 sm:px-4 sm:py-4 shadow-sm hover:border-brand-primary/50 transition-all';
 
   useEffect(() => {
-    fetchVendors();
+    fetchvendor();
   }, [statusFilter, search]);
 
-  const fetchVendors = async () => {
+  const fetchvendor = async () => {
     setLoading(true);
     try {
       const params = {};
       if (statusFilter !== 'all') params.status = statusFilter;
       if (search) params.search = search;
 
-      const response = await axios.get(`${apiBase}/api/admin/vendors`, {
+      const response = await axios.get(`${apiBase}/api/admin/vendor`, {
         params,
         withCredentials: true
       });
 
       if (response.data.success) {
-        setVendors(response.data.data);
+        setvendor(response.data.data);
       }
     } catch (error) {
-      toast.error('Failed to load vendors');
+      toast.error('Failed to load vendor');
     } finally {
       setLoading(false);
     }
@@ -92,17 +92,17 @@ const VendorsList = () => {
     return colors[status] || colors.pending;
   };
 
-  const updateVendorStatusInline = async (vendorId, newStatus) => {
+  const updatevendortatusInline = async (vendorId, newStatus) => {
     setUpdatingStatus(prev => ({ ...prev, [vendorId]: true }));
     try {
       const response = await axios.put(
-        `${apiBase}/api/admin/vendors/${vendorId}/status`,
+        `${apiBase}/api/admin/vendor/${vendorId}/status`,
         { status: newStatus, sendEmail: true },
         { withCredentials: true }
       );
       if (response.data.success) {
         toast.success('Status updated');
-        fetchVendors();
+        fetchvendor();
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update status');
@@ -128,7 +128,7 @@ const VendorsList = () => {
 
     setPasswordLoading((prev) => ({ ...prev, [vendorId]: true }));
     try {
-      const response = await axios.get(`${apiBase}/api/admin/vendors/${vendorId}/password`, {
+      const response = await axios.get(`${apiBase}/api/admin/vendor/${vendorId}/password`, {
         withCredentials: true
       });
 
@@ -198,7 +198,25 @@ const VendorsList = () => {
   };
 
   const prefillWhatsAppMessage = () => {
-    const template = `Hello! 👋\n\nThis is a message from Next Subscription Admin Portal.\n\nYou can use this feature to send quick WhatsApp messages to vendors or team members.\n\nTo use:\n1. Enter the recipient's WhatsApp number (with country code, e.g., +1234567890)\n2. Type your message\n3. Click "Generate WhatsApp Link" to create a shareable link\n4. Copy the link or open it directly in WhatsApp\n\nFeatures:\n✅ Send vendor credentials\n✅ Notify about account status changes\n✅ Share important updates\n✅ Quick communication\n\nNeed help? Contact support.`;
+    const template = `Hello! 👋
+
+This is a message from Next Subscription Admin Portal.
+
+You can use this feature to send quick WhatsApp messages to vendor or team members.
+
+To use:
+1. Enter the recipient's WhatsApp number (with country code, e.g., +1234567890)
+2. Type your message
+3. Click "Generate WhatsApp Link" to create a shareable link
+4. Copy the link or open it directly in WhatsApp
+
+Features:
+✅ Send vendor credentials
+✅ Notify about account status changes
+✅ Share important updates
+✅ Quick communication
+
+Need help? Contact support.`;
     setManualWhatsAppMessage(template);
   };
 
@@ -286,7 +304,7 @@ const VendorsList = () => {
     updateRowLoading(vendor._id, 'resend', true);
     try {
       const response = await axios.post(
-        `${apiBase}/api/admin/vendors/${vendor._id}/resend-credentials`,
+        `${apiBase}/api/admin/vendor/${vendor._id}/resend-credentials`,
         { sendEmail: true },
         { withCredentials: true }
       );
@@ -298,7 +316,7 @@ const VendorsList = () => {
           setPasswordModal({ open: true, vendor, password: response.data.temporaryPassword, context: 'resend' });
           setVisiblePasswords((prev) => ({ ...prev, [vendor._id]: false }));
         }
-        fetchVendors();
+        fetchvendor();
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to resend credentials');
@@ -315,7 +333,7 @@ const VendorsList = () => {
     updateRowLoading(vendor._id, 'reset', true);
     try {
       const response = await axios.post(
-        `${apiBase}/api/admin/vendors/${vendor._id}/reset-password`,
+        `${apiBase}/api/admin/vendor/${vendor._id}/reset-password`,
         { sendEmail: true },
         { withCredentials: true }
       );
@@ -327,7 +345,7 @@ const VendorsList = () => {
           setPasswordModal({ open: true, vendor, password: response.data.password, context: 'reset' });
           setVisiblePasswords((prev) => ({ ...prev, [vendor._id]: false }));
         }
-        fetchVendors();
+        fetchvendor();
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to reset password');
@@ -347,15 +365,15 @@ const VendorsList = () => {
   };
 
   const stats = useMemo(() => {
-    const totalVendors = vendors.length;
-    const activeVendors = vendors.filter(v => v.status === 'active').length;
-    const pendingVendors = vendors.filter(v => v.status === 'pending').length;
-    const suspendedVendors = vendors.filter(v => v.status === 'suspended').length;
-    const recentVendors = vendors.slice(0, 5);
+    const totalvendor = vendor.length;
+    const activevendor = vendor.filter(v => v.status === 'active').length;
+    const pendingvendor = vendor.filter(v => v.status === 'pending').length;
+    const suspendedvendor = vendor.filter(v => v.status === 'suspended').length;
+    const recentvendor = vendor.slice(0, 5);
 
     // Approximate average response time based on account age since creation
-    const avgMs = totalVendors > 0
-      ? Math.floor(vendors.reduce((sum, v) => sum + Math.max(0, Date.now() - new Date(v.createdAt).getTime()), 0) / totalVendors)
+    const avgMs = totalvendor > 0
+      ? Math.floor(vendor.reduce((sum, v) => sum + Math.max(0, Date.now() - new Date(v.createdAt).getTime()), 0) / totalvendor)
       : 0;
 
     const msToHuman = (ms) => {
@@ -371,17 +389,17 @@ const VendorsList = () => {
     const averageResponseTime = msToHuman(avgMs);
 
     return {
-      totalVendors,
-      activeVendors,
-      pendingVendors,
-      suspendedVendors,
-      recentVendors,
+      totalvendor,
+      activevendor,
+      pendingvendor,
+      suspendedvendor,
+      recentvendor,
       averageResponseTime
     };
-  }, [vendors]);
+  }, [vendor]);
 
   return (
-    <AdminLayout currentPage="vendors">
+    <AdminLayout currentPage="vendor">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -389,7 +407,7 @@ const VendorsList = () => {
             Vendor Management
           </h1>
           <button
-            onClick={() => navigate('/admin/vendors/create')}
+            onClick={() => navigate('/admin/vendor/create')}
             className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-brand-primary text-black rounded-xl font-semibold hover:bg-brand-primary-hover transition-colors shadow-lg text-sm sm:text-base"
           >
             + Create Vendor
@@ -420,22 +438,22 @@ const VendorsList = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
                 <div className="glass-card rounded-2xl p-5 border border-theme-base/30">
                   <div className="text-3xl mb-2">🏢</div>
-                  <div className="text-3xl font-bold text-theme-primary">{stats.totalVendors}</div>
-                  <p className="text-sm text-theme-secondary">Total Vendors</p>
+                  <div className="text-3xl font-bold text-theme-primary">{stats.totalvendor}</div>
+                  <p className="text-sm text-theme-secondary">Total vendor</p>
                 </div>
                 <div className="glass-card rounded-2xl p-5 border border-theme-base/30">
                   <div className="text-3xl mb-2">✅</div>
-                  <div className="text-3xl font-bold text-success">{stats.activeVendors}</div>
+                  <div className="text-3xl font-bold text-success">{stats.activevendor}</div>
                   <p className="text-sm text-theme-secondary">Active</p>
                 </div>
                 <div className="glass-card rounded-2xl p-5 border border-theme-base/30">
                   <div className="text-3xl mb-2">⏳</div>
-                  <div className="text-3xl font-bold text-warning">{stats.pendingVendors}</div>
+                  <div className="text-3xl font-bold text-warning">{stats.pendingvendor}</div>
                   <p className="text-sm text-theme-secondary">Pending</p>
                 </div>
                 <div className="glass-card rounded-2xl p-5 border border-theme-base/30">
                   <div className="text-3xl mb-2">⛔</div>
-                  <div className="text-3xl font-bold text-error">{stats.suspendedVendors}</div>
+                  <div className="text-3xl font-bold text-error">{stats.suspendedvendor}</div>
                   <p className="text-sm text-theme-secondary">Suspended</p>
                 </div>
                 <div className="glass-card rounded-2xl p-5 border border-theme-base/30">
@@ -445,14 +463,14 @@ const VendorsList = () => {
                 </div>
               </div>
 
-              {stats.recentVendors.length > 0 && (
+              {stats.recentvendor.length > 0 && (
                 <div className="space-y-3">
-                  <h3 className="text-lg font-semibold text-theme-primary">Recent Vendors</h3>
+                  <h3 className="text-lg font-semibold text-theme-primary">Recent vendor</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {stats.recentVendors.map(vendor => (
+                    {stats.recentvendor.map(vendor => (
                       <button
                         key={vendor._id}
-                        onClick={() => navigate(`/admin/vendors/${vendor._id}`)}
+                        onClick={() => navigate(`/admin/vendor/${vendor._id}`)}
                         className="glass-card rounded-2xl p-4 text-left border border-theme-base/30 hover:border-brand-primary/40 hover:shadow-lg transition-all"
                       >
                         <div className="flex items-center justify-between gap-3">
@@ -544,15 +562,15 @@ const VendorsList = () => {
           </div>
         </div>
 
-        {/* Vendors Table */}
+        {/* vendor Table */}
         {loading ? (
           <div className="glass-card rounded-2xl p-12 text-center border border-theme-base/30">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary mx-auto mb-4"></div>
-            <p className="text-theme-secondary">Loading vendors...</p>
+            <p className="text-theme-secondary">Loading vendor...</p>
           </div>
-        ) : vendors.length === 0 ? (
+        ) : vendor.length === 0 ? (
           <div className="glass-card rounded-2xl p-12 text-center border border-theme-base/30">
-            <p className="text-theme-secondary">No vendors found</p>
+            <p className="text-theme-secondary">No vendor found</p>
           </div>
         ) : (
           <div className="glass-card rounded-2xl overflow-hidden border border-theme-base/30">
@@ -568,7 +586,7 @@ const VendorsList = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-theme-base/30">
-                  {vendors.map((vendor) => {
+                  {vendor.map((vendor) => {
                     const rowLoading = rowActionLoading[vendor._id] || {};
                     const resendLoading = Boolean(rowLoading.resend);
                     const resetLoading = Boolean(rowLoading.reset);
@@ -583,7 +601,7 @@ const VendorsList = () => {
                     <tr
                       key={vendor._id}
                       className="hover:bg-theme-surface/30 hover:border-brand-primary/20 hover:shadow-theme-brand/20 transition-all cursor-pointer border-b border-theme-base/20 align-middle"
-                      onClick={() => navigate(`/admin/vendors/${vendor._id}`)}
+                      onClick={() => navigate(`/admin/vendor/${vendor._id}`)}
                     >
                       <td className="px-4 sm:px-6 py-3 sm:py-4">
                         <div className="max-w-[320px]">
@@ -850,4 +868,4 @@ const VendorsList = () => {
   );
 };
 
-export default VendorsList;
+export default VendorList;

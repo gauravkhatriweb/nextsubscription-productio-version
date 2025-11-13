@@ -1,7 +1,7 @@
 /**
  * Vendor Login Page
  * 
- * Login page for vendors to access their portal.
+ * Login page for vendor to access their portal.
  * 
  * @component
  */
@@ -41,7 +41,7 @@ const VendorLogin = () => {
 
       if (response.data.success) {
         toast.success('Login successful!');
-        // CLEANUP: Removed setup redirect - vendors go directly to dashboard
+        // CLEANUP: Removed setup redirect - vendor go directly to dashboard
         navigate('/vendor/dashboard');
       }
     } catch (error) {

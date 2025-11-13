@@ -1,7 +1,7 @@
 /**
  * Vendor Product Controller
  * 
- * Handles product CRUD operations for vendors.
+ * Handles product CRUD operations for vendor.
  * 
  * @author Gaurav Khatri
  * @version 1.0

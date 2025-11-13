@@ -37,8 +37,8 @@ const AdminStockRequest = () => {
   const fetchVendorAndProducts = async () => {
     try {
       const [vendorRes, productsRes] = await Promise.all([
-        axios.get(`${apiBase}/api/admin/vendors/${vendorId}`, { withCredentials: true }),
-        axios.get(`${apiBase}/api/admin/vendors/${vendorId}/products`, { withCredentials: true })
+        axios.get(`${apiBase}/api/admin/vendor/${vendorId}`, { withCredentials: true }),
+        axios.get(`${apiBase}/api/admin/vendor/${vendorId}/products`, { withCredentials: true })
       ]);
 
       if (vendorRes.data.success) {
@@ -50,7 +50,7 @@ const AdminStockRequest = () => {
       }
     } catch (error) {
       toast.error('Failed to load vendor information');
-      navigate('/admin/vendors');
+      navigate('/admin/vendor');
     } finally {
       setLoading(false);
     }
@@ -70,7 +70,7 @@ const AdminStockRequest = () => {
 
     try {
       const response = await axios.post(
-        `${apiBase}/api/admin/vendors/${vendorId}/requests`,
+        `${apiBase}/api/admin/vendor/${vendorId}/requests`,
         formData,
         { withCredentials: true }
       );
@@ -114,7 +114,7 @@ const AdminStockRequest = () => {
             <p className="text-theme-secondary">Create a stock request and generate communication templates</p>
           </div>
           <button
-            onClick={() => navigate(`/admin/vendors/${vendorId}`)}
+            onClick={() => navigate(`/admin/vendor/${vendorId}`)}
             className="px-6 py-3 border border-theme-base rounded-xl font-semibold hover:bg-theme-surface transition-colors"
           >
             Back to Vendor
@@ -201,7 +201,7 @@ const AdminStockRequest = () => {
             </button>
             <button
               type="button"
-              onClick={() => navigate(`/admin/vendors/${vendorId}`)}
+              onClick={() => navigate(`/admin/vendor/${vendorId}`)}
               className="px-8 py-3 border border-theme-base rounded-xl font-semibold hover:bg-theme-surface transition-colors"
             >
               Cancel
@@ -291,7 +291,7 @@ const AdminStockRequest = () => {
                   <button
                     onClick={() => {
                       setShowTemplates(false);
-                      navigate(`/admin/vendors/${vendorId}`);
+                      navigate(`/admin/vendor/${vendorId}`);
                     }}
                     className="flex-1 px-6 py-3 bg-brand-primary text-white rounded-lg hover:bg-brand-primary-hover transition-colors"
                   >

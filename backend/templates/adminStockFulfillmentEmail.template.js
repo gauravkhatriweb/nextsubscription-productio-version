@@ -1,7 +1,7 @@
 /**
  * Admin Stock Fulfillment Email Template
  * 
- * Email template for notifying admins when vendors fulfill stock requests.
+ * Email template for notifying admins when vendor fulfill stock requests.
  * 
  * @author Gaurav Khatri
  * @version 1.0

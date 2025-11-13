@@ -1,7 +1,7 @@
 /**
  * Product Request Create Form
  * 
- * Form for vendors to submit product proposals for admin review.
+ * Form for vendor to submit product proposals for admin review.
  * 
  * @component
  */

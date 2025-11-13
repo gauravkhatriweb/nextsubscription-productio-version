@@ -1,7 +1,7 @@
 /**
  * Vendor Order Controller
  * 
- * Handles order management for vendors.
+ * Handles order management for vendor.
  * 
  * @author Gaurav Khatri
  * @version 1.0

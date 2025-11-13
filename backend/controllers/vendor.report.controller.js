@@ -1,7 +1,7 @@
 /**
  * Vendor Report Controller
  * 
- * Handles reports and payouts for vendors.
+ * Handles reports and payouts for vendor.
  * 
  * @author Gaurav Khatri
  * @version 1.0

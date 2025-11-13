@@ -113,12 +113,12 @@ const extractPasswordFromAuditDetails = (details) => {
   return null;
 };
 
-const hydrateAdminPasswords = async (vendors = []) => {
-  if (!Array.isArray(vendors) || vendors.length === 0) {
-    return vendors;
+const hydrateAdminPasswords = async (vendor = []) => {
+  if (!Array.isArray(vendor) || vendor.length === 0) {
+    return vendor;
   }
 
-  const vendorMeta = vendors.map((vendor) => {
+  const vendorMeta = vendor.map((vendor) => {
     const decrypted = decryptPassword(vendor.adminPasswordEncrypted);
     return {
       vendor,
@@ -161,7 +161,7 @@ const hydrateAdminPasswords = async (vendors = []) => {
 
   const updatePromises = [];
 
-  const sanitizedVendors = vendorMeta.map((meta) => {
+  const sanitizedvendor = vendorMeta.map((meta) => {
     let password = meta.decrypted;
 
     if (!password && meta.vendorId && fallbackMap.has(meta.vendorId)) {
@@ -194,7 +194,7 @@ const hydrateAdminPasswords = async (vendors = []) => {
     await Promise.allSettled(updatePromises);
   }
 
-  return sanitizedVendors;
+  return sanitizedvendor;
 };
 
 export const generateSecurePassword = () => {
@@ -340,9 +340,9 @@ export const createVendor = async (vendorData, adminEmail, ipAddress, userAgent,
 };
 
 /**
- * Get vendors list with filters
+ * Get vendor list with filters
  */
-export const getVendors = async (filters = {}) => {
+export const getvendor = async (filters = {}) => {
   try {
     const query = {};
     
@@ -358,12 +358,12 @@ export const getVendors = async (filters = {}) => {
       ];
     }
     
-    const vendors = await VendorModel.find(query)
+    const vendor = await VendorModel.find(query)
       .select('-passwordHash')
       .sort({ createdAt: -1 })
       .lean();
     
-    const hydrated = await hydrateAdminPasswords(vendors);
+    const hydrated = await hydrateAdminPasswords(vendor);
 
     return hydrated.map(({ adminPassword, ...rest }) => ({
       ...rest,
@@ -535,7 +535,7 @@ export const updateVendor = async (vendorId, updateData, adminEmail, ipAddress, 
 /**
  * Update vendor status
  */
-export const updateVendorStatus = async (vendorId, newStatus, adminEmail, ipAddress, userAgent, notificationOptions = {}) => {
+export const updatevendortatus = async (vendorId, newStatus, adminEmail, ipAddress, userAgent, notificationOptions = {}) => {
   try {
     const vendor = await VendorModel.findById(vendorId);
     if (!vendor) {
@@ -548,8 +548,8 @@ export const updateVendorStatus = async (vendorId, newStatus, adminEmail, ipAddr
     
     // Send status change email notifications (for all status changes)
     if (notificationOptions.sendEmail !== false) {
-      const { generateVendorStatusChangeEmail } = await import('../templates/vendorStatusChangeEmail.template.js');
-      const statusEmailHtml = generateVendorStatusChangeEmail({
+      const { generatevendortatusChangeEmail } = await import('../templates/vendortatusChangeEmail.template.js');
+      const statusEmailHtml = generatevendortatusChangeEmail({
         companyName: vendor.companyName || vendor.displayName,
         status: newStatus,
         reason: notificationOptions.rejectionReason || null

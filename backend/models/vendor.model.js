@@ -11,7 +11,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-const vendorSchema = new mongoose.Schema({
+const vendorchema = new mongoose.Schema({
   // Company Information
   companyName: {
     type: String,
@@ -100,20 +100,20 @@ const vendorSchema = new mongoose.Schema({
 });
 
 // Indexes for efficient queries
-vendorSchema.index({ companyName: 'text', primaryEmail: 'text' });
-vendorSchema.index({ status: 1, createdAt: -1 });
+vendorchema.index({ companyName: 'text', primaryEmail: 'text' });
+vendorchema.index({ status: 1, createdAt: -1 });
 
 // Instance method: Compare password
-vendorSchema.methods.comparePassword = async function(password) {
+vendorchema.methods.comparePassword = async function(password) {
   return await bcrypt.compare(password, this.passwordHash);
 };
 
 // Static method: Hash password
-vendorSchema.statics.hashPassword = async function(password) {
+vendorchema.statics.hashPassword = async function(password) {
   return await bcrypt.hash(password, 10);
 };
 
-const VendorModel = mongoose.model('Vendor', vendorSchema);
+const VendorModel = mongoose.model('Vendor', vendorchema);
 
 export default VendorModel;
 

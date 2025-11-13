@@ -58,7 +58,7 @@ const VendorCreate = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${apiBase}/api/admin/vendors`,
+        `${apiBase}/api/admin/vendor`,
         formData,
         { withCredentials: true }
       );
@@ -69,7 +69,7 @@ const VendorCreate = () => {
           setVendorPassword(response.data.data.temporaryPassword);
         }
         if (!response.data.data.temporaryPassword) {
-          navigate('/admin/vendors');
+          navigate('/admin/vendor');
         }
       }
     } catch (error) {
@@ -80,14 +80,14 @@ const VendorCreate = () => {
   };
 
   return (
-    <AdminLayout currentPage="vendors">
+    <AdminLayout currentPage="vendor">
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate('/admin/vendors')}
+            onClick={() => navigate('/admin/vendor')}
             className="text-theme-secondary hover:text-theme-primary transition-colors"
           >
-            ← Back to Vendors
+            ← Back to vendor
           </button>
           <h1 className="text-3xl font-bold" style={{ fontFamily: 'Poppins, Inter, system-ui' }}>
             Create Vendor
@@ -238,7 +238,7 @@ const VendorCreate = () => {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/admin/vendors')}
+              onClick={() => navigate('/admin/vendor')}
               className="px-8 py-3 border border-theme-base rounded-xl font-semibold hover:bg-theme-surface transition-colors"
             >
               Cancel
@@ -273,7 +273,7 @@ const VendorCreate = () => {
             </div>
           )}
 
-          {/* WhatsApp Message Removed: Manual templates used in Vendors List / Detail */}
+          {/* WhatsApp Message Removed: Manual templates used in vendor List / Detail */}
         </form>
       </div>
     </AdminLayout>
