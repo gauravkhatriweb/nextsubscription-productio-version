@@ -17,12 +17,20 @@ import {
   refreshCache,
   pingDatabase,
   pingApiEndpoints,
-  runSystemDiagnostics
+  runSystemDiagnostics,
+  getArchivedLogSnapshots,
+  getArchivedLogSnapshot
 } from '../services/systemMonitoring.service.js';
 import {
   performCacheMaintenance,
   cleanupUserData,
-  performGlobalCleanup
+  performGlobalCleanup,
+  getUserMaintenanceStats,
+  rebuildSystemIndexes,
+  checkStorageHealth,
+  restartWorkerProcesses,
+  purgeExpiredSessions,
+  rotateLogs
 } from '../services/maintenance.service.js';
 import getHealthStatus from '../services/health.service.js';
 
@@ -208,13 +216,31 @@ export const maintenanceCacheController = async (req, res) => {
 export const maintenanceUsersController = async (req, res) => {
   try {
     const adminEmail = req.admin?.email || null;
-    const options = req.body || {};
+    const isGet = req.method === 'GET';
 
-    const result = await cleanupUserData(adminEmail, options);
-    return res.status(200).json({
-      success: true,
-      ...result
-    });
+    if (isGet) {
+      const cleanup = String(req.query.cleanup || 'false').toLowerCase() === 'true';
+      const inactiveDays = req.query.inactiveDays ? parseInt(req.query.inactiveDays, 10) : 180;
+      const mode = req.query.mode ? String(req.query.mode).toLowerCase() : 'anonymize';
+
+      const result = await getUserMaintenanceStats(adminEmail, {
+        cleanup,
+        inactiveDays,
+        mode
+      });
+
+      return res.status(200).json({
+        success: true,
+        ...result
+      });
+    } else {
+      const options = req.body || {};
+      const result = await cleanupUserData(adminEmail, options);
+      return res.status(200).json({
+        success: true,
+        ...result
+      });
+    }
   } catch (error) {
     return res.status(400).json({
       success: false,
@@ -243,6 +269,168 @@ export const maintenanceGlobalController = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message || 'Global cleanup failed'
+    });
+  }
+};
+
+/**
+ * Controller: Rebuild MongoDB Indexes
+ *
+ * @route POST /api/admin/system/maintenance/reindex
+ * @protected
+ */
+export const maintenanceReindexController = async (req, res) => {
+  try {
+    const adminEmail = req.admin?.email || null;
+    const result = await rebuildSystemIndexes(adminEmail);
+    return res.status(result.success ? 200 : 500).json({
+      success: result.success,
+      ...result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to rebuild indexes'
+    });
+  }
+};
+
+/**
+ * Controller: Storage Health Check
+ *
+ * @route GET /api/admin/system/maintenance/storage-health
+ * @protected
+ */
+export const maintenanceStorageHealthController = async (req, res) => {
+  try {
+    const adminEmail = req.admin?.email || null;
+    const result = await checkStorageHealth(adminEmail);
+    return res.status(200).json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to check storage health'
+    });
+  }
+};
+
+/**
+ * Controller: Restart Worker Processes
+ *
+ * @route POST /api/admin/system/maintenance/restart-workers
+ * @protected
+ */
+export const maintenanceRestartWorkersController = async (req, res) => {
+  try {
+    const adminEmail = req.admin?.email || null;
+    const result = await restartWorkerProcesses(adminEmail);
+    return res.status(result.success ? 200 : 500).json({
+      success: result.success,
+      ...result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to restart workers'
+    });
+  }
+};
+
+/**
+ * Controller: Purge Expired Sessions
+ *
+ * @route POST /api/admin/system/maintenance/purge-sessions
+ * @protected
+ */
+export const maintenancePurgeSessionsController = async (req, res) => {
+  try {
+    const adminEmail = req.admin?.email || null;
+    const options = req.body || {};
+    const result = await purgeExpiredSessions(adminEmail, options);
+    return res.status(200).json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to purge sessions'
+    });
+  }
+};
+
+/**
+ * Controller: Rotate Logs
+ *
+ * @route POST /api/admin/system/maintenance/logs/rotate
+ * @protected
+ */
+export const maintenanceRotateLogsController = async (req, res) => {
+  try {
+    const adminEmail = req.admin?.email || null;
+    const result = await rotateLogs(adminEmail, req.body || {});
+    return res.status(200).json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to rotate logs'
+    });
+  }
+};
+
+/**
+ * Controller: List Archived Log Snapshots
+ *
+ * @route GET /api/admin/system/logs-archives
+ * @protected
+ */
+export const getArchivedLogsController = async (req, res) => {
+  try {
+    const snapshots = await getArchivedLogSnapshots();
+    return res.status(200).json({
+      success: true,
+      archives: snapshots
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to list archived logs'
+    });
+  }
+};
+
+/**
+ * Controller: Get Archived Log Snapshot
+ *
+ * @route GET /api/admin/system/logs-archives/:fileName
+ * @protected
+ */
+export const getArchivedLogController = async (req, res) => {
+  try {
+    const fileName = decodeURIComponent(req.params.fileName);
+    const snapshot = await getArchivedLogSnapshot(fileName);
+
+    if (!snapshot) {
+      return res.status(404).json({
+        success: false,
+        message: 'Archive not found'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      archive: snapshot
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to load archived log'
     });
   }
 };

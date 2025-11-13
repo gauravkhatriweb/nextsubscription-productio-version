@@ -3,6 +3,8 @@
  * 
  * Recharts pie chart for displaying external service status breakdown.
  * 
+ * REF: THEME/REFACTOR: Updated to use theme tokens instead of hardcoded colors
+ * 
  * @component
  */
 
@@ -15,6 +17,8 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
+import { useTheme } from '../../../theme/ThemeProvider';
+import { getThemeToken } from '../../../constants/themeTokens';
 
 /**
  * PieChart Component
@@ -29,8 +33,24 @@ const PieChart = ({
   dataKey = 'value',
   nameKey = 'name',
   height = 300,
-  colors = ['#10B981', '#F59E0B', '#E43636', '#3B82F6', '#8B5CF6']
+  colors = null // REF: THEME/REFACTOR: Will use theme tokens if not provided
 }) => {
+  // REF: THEME/REFACTOR: Get theme-aware colors
+  const { theme } = useTheme();
+  const defaultColors = colors || [
+    getThemeToken(theme, 'chartSuccess'),
+    getThemeToken(theme, 'chartWarning'),
+    getThemeToken(theme, 'chartPrimary'),
+    getThemeToken(theme, 'chartInfo'),
+    '#8B5CF6' // Purple accent - add to theme tokens if needed
+  ];
+  const chartColors = colors || defaultColors;
+  
+  // REF: THEME/REFACTOR: Theme-aware tooltip and legend colors
+  const tooltipBg = theme === 'dark' ? '#1F2937' : '#FFFFFF';
+  const tooltipBorder = theme === 'dark' ? '#374151' : '#E5E7EB';
+  const tooltipText = theme === 'dark' ? '#F9FAFB' : '#111827';
+  const axisColor = theme === 'dark' ? '#9CA3AF' : '#6B7280';
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-full min-h-[300px] text-theme-secondary">
@@ -51,7 +71,7 @@ const PieChart = ({
       <text 
         x={x} 
         y={y} 
-        fill="white" 
+        fill={tooltipText} 
         textAnchor={x > cx ? 'start' : 'end'} 
         dominantBaseline="central"
         fontSize={12}
@@ -72,25 +92,25 @@ const PieChart = ({
           labelLine={false}
           label={renderCustomizedLabel}
           outerRadius={80}
-          fill="#8884d8"
+          fill={getThemeToken(theme, 'chartPrimary')}
           dataKey={dataKey}
           nameKey={nameKey}
         >
           {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+            <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
           ))}
         </Pie>
         <Tooltip
           contentStyle={{
-            backgroundColor: '#1F2937',
-            border: '1px solid #374151',
+            backgroundColor: tooltipBg,
+            border: `1px solid ${tooltipBorder}`,
             borderRadius: '8px',
-            color: '#F9FAFB'
+            color: tooltipText
           }}
-          labelStyle={{ color: '#9CA3AF' }}
+          labelStyle={{ color: axisColor }}
         />
         <Legend 
-          wrapperStyle={{ color: '#9CA3AF' }}
+          wrapperStyle={{ color: axisColor }}
         />
       </RechartsPieChart>
     </ResponsiveContainer>

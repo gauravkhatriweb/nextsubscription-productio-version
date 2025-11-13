@@ -26,7 +26,7 @@ import { readFileSync } from 'fs';
 // Get package.json version
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const packagePath = join(__dirname, '..', 'package.json');
+const packagePath = join(__dirname, '..', '..','package.json');
 const packageJson = JSON.parse(readFileSync(packagePath, 'utf8'));
 
 /**

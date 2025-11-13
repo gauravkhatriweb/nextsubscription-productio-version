@@ -21,7 +21,13 @@ const systemActionSchema = new mongoose.Schema({
       'flush-cache',
       'logs-cleared',
       'user-maintenance',
-      'global-cleanup'
+      'global-cleanup',
+      'maintenance-user-stats',
+      'reindex-collections',
+      'storage-health-check',
+      'restart-workers',
+      'purge-expired-sessions',
+      'log-rotation'
     ]
   },
   performedBy: {

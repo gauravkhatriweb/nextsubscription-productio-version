@@ -1,5 +1,6 @@
+// REF: THEME/REFACTOR: Updated to use centralized constants
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getCSSVariables } from './themeTokens';
+import { getCSSVariables } from '../constants/themeTokens';
 
 const ThemeContext = createContext();
 

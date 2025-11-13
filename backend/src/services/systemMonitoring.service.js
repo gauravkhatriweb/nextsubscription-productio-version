@@ -16,8 +16,13 @@ import {
   writeSystemLog,
   readRecentSystemLogs,
   readSystemLogsByDate,
-  listAvailableLogDates
+  listAvailableLogDates,
+  listArchivedSnapshots,
+  readArchivedSnapshot,
+  archiveLogSnapshot
 } from '../utils/logger.js';
+import { resetHealthCacheInternal } from '../controllers/health.controller.js';
+import { clearRequestHistory } from '../middleware/metrics.middleware.js';
 
 /**
  * Get System Status
@@ -227,24 +232,30 @@ export const getAvailableLogDates = async () => {
  */
 export const clearSystemLogs = async (adminEmail) => {
   try {
+    const archiveResult = await archiveLogSnapshot({
+      initiatedBy: adminEmail,
+      reason: 'manual-clear'
+    });
+
     // Create a marker document to track when logs were cleared
     await SystemActionModel.create({
       action: 'logs-cleared',
       performedBy: adminEmail,
       status: 'success',
-      result: { message: 'System logs cleared', timestamp: new Date().toISOString() }
+      result: { message: 'System logs cleared', timestamp: new Date().toISOString(), archiveResult }
     });
 
     await writeSystemLog({
       level: 'info',
       source: 'maintenance',
-      message: 'System logs clear marker created',
-      meta: { performedBy: adminEmail }
+      message: 'System logs cleared and archived',
+      meta: { performedBy: adminEmail, archiveResult }
     });
     
     return {
       success: true,
-      message: 'System logs cleared successfully'
+      message: 'System logs cleared successfully',
+      archive: archiveResult
     };
   } catch (error) {
     console.error('Error clearing system logs:', error);
@@ -269,9 +280,8 @@ export const clearSystemLogs = async (adminEmail) => {
 export const refreshCache = async (adminEmail) => {
   const startTime = Date.now();
   try {
-    // In a real system, this would clear Redis or in-memory cache
-    // For now, simulate cache clearing
-    await new Promise(resolve => setTimeout(resolve, 500));
+    resetHealthCacheInternal();
+    clearRequestHistory();
     
     const executionTime = Date.now() - startTime;
     
@@ -512,5 +522,26 @@ export const runSystemDiagnostics = async (adminEmail) => {
     });
     throw error;
   }
+};
+
+/**
+ * List archived log snapshots with metadata.
+ *
+ * @returns {Promise<Array>}
+ */
+export const getArchivedLogSnapshots = async () => {
+  const snapshots = await listArchivedSnapshots();
+  return snapshots;
+};
+
+/**
+ * Read an archived log snapshot by filename.
+ *
+ * @param {string} fileName
+ * @returns {Promise<Array>}
+ */
+export const getArchivedLogSnapshot = async (fileName) => {
+  const snapshot = await readArchivedSnapshot(fileName);
+  return snapshot;
 };
 

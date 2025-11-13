@@ -51,6 +51,12 @@ const userSchema = new mongoose.Schema({
   
 }, { timestamps: true }); // Automatically adds createdAt and updatedAt fields
 
+// MODEL: Database indexes for query optimization
+userSchema.index({ email: 1 }); // Already unique, but explicit index for lookups
+userSchema.index({ isAccountVerified: 1, createdAt: -1 }); // For filtering verified users
+userSchema.index({ createdAt: -1 }); // For sorting by creation date
+userSchema.index({ updatedAt: -1 }); // For inactive user cleanup queries
+
 /**
  * Static Method: Hash Password
  * 

@@ -99,9 +99,12 @@ const vendorchema = new mongoose.Schema({
   timestamps: true // Adds createdAt and updatedAt
 });
 
-// Indexes for efficient queries
-vendorchema.index({ companyName: 'text', primaryEmail: 'text' });
-vendorchema.index({ status: 1, createdAt: -1 });
+// MODEL: Database indexes for query optimization
+vendorchema.index({ companyName: 'text', primaryEmail: 'text' }); // Text search
+vendorchema.index({ status: 1, createdAt: -1 }); // Status filtering with date sort
+vendorchema.index({ primaryEmail: 1 }); // Email lookups (already unique, explicit for performance)
+vendorchema.index({ createdBy: 1, createdAt: -1 }); // Admin-created vendor queries
+vendorchema.index({ updatedAt: -1 }); // For maintenance queries
 
 // Instance method: Compare password
 vendorchema.methods.comparePassword = async function(password) {

@@ -7,9 +7,11 @@
  * @version 1.0
  */
 
+// REF: THEME/REFACTOR: Use centralized API configuration
 import axios from 'axios';
+import { API_CONFIG } from '../../constants/ui.js';
 
-const apiBase = (import.meta.env.VITE_API_BASE_URL && String(import.meta.env.VITE_API_BASE_URL).trim().replace(/\/+$/, '')) || 'http://localhost:3000';
+const apiBase = API_CONFIG.BASE_URL;
 
 /**
  * Get system health status
@@ -111,6 +113,59 @@ export const getSystemLogsByDate = async (date, limit = 500) => {
   } catch (error) {
     console.error('Archived system logs error:', error);
     return [];
+  }
+};
+
+/**
+ * Get archived log snapshots metadata
+ *
+ * @returns {Promise<Array>}
+ */
+export const getArchivedLogSnapshots = async () => {
+  try {
+    const response = await axios.get(`${apiBase}/api/admin/system/logs-archives`, {
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.data.success) {
+      return response.data.archives || [];
+    }
+    return [];
+  } catch (error) {
+    console.error('Archived log snapshots error:', error);
+    return [];
+  }
+};
+
+/**
+ * Get a specific archived log snapshot by file name
+ *
+ * @param {string} fileName
+ * @returns {Promise<Object|null>}
+ */
+export const getArchivedLogSnapshot = async (fileName) => {
+  if (!fileName) {
+    return null;
+  }
+
+  try {
+    const response = await axios.get(`${apiBase}/api/admin/system/logs-archives/${encodeURIComponent(fileName)}`, {
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.data.success) {
+      return response.data.archive;
+    }
+    return null;
+  } catch (error) {
+    console.error('Archived log snapshot error:', error);
+    return null;
   }
 };
 
@@ -297,6 +352,42 @@ export const maintenanceCache = async () => {
 };
 
 /**
+ * Maintenance: User stats & optional cleanup (GET)
+ *
+ * @param {Object} params
+ */
+export const maintenanceUsersStats = async (params = {}) => {
+  try {
+    const query = new URLSearchParams();
+    if (params.cleanup) {
+      query.set('cleanup', 'true');
+    }
+    if (params.inactiveDays) {
+      query.set('inactiveDays', params.inactiveDays);
+    }
+    if (params.mode) {
+      query.set('mode', params.mode);
+    }
+
+    const queryString = query.toString();
+    const response = await axios.get(
+      `${apiBase}/api/admin/system/maintenance/users${queryString ? `?${queryString}` : ''}`,
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Maintenance users stats error:', error);
+    throw error;
+  }
+};
+
+/**
  * Maintenance: User cleanup
  *
  * @param {Object} payload - Cleanup options
@@ -317,6 +408,124 @@ export const maintenanceUsers = async (payload) => {
     return response.data;
   } catch (error) {
     console.error('Maintenance users error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Maintenance: Rebuild database indexes
+ */
+export const maintenanceReindex = async () => {
+  try {
+    const response = await axios.post(
+      `${apiBase}/api/admin/system/maintenance/reindex`,
+      {},
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Maintenance reindex error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Maintenance: Storage health check
+ */
+export const maintenanceStorageHealth = async () => {
+  try {
+    const response = await axios.get(
+      `${apiBase}/api/admin/system/maintenance/storage-health`,
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Maintenance storage health error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Maintenance: Restart worker processes
+ */
+export const maintenanceRestartWorkers = async () => {
+  try {
+    const response = await axios.post(
+      `${apiBase}/api/admin/system/maintenance/restart-workers`,
+      {},
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Maintenance restart workers error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Maintenance: Purge expired sessions
+ *
+ * @param {Object} payload
+ */
+export const maintenancePurgeSessions = async (payload = {}) => {
+  try {
+    const response = await axios.post(
+      `${apiBase}/api/admin/system/maintenance/purge-sessions`,
+      payload,
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Maintenance purge sessions error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Maintenance: Rotate logs into archives
+ *
+ * @param {Object} payload
+ */
+export const maintenanceRotateLogs = async (payload = {}) => {
+  try {
+    const response = await axios.post(
+      `${apiBase}/api/admin/system/maintenance/logs/rotate`,
+      payload,
+      {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Maintenance rotate logs error:', error);
     throw error;
   }
 };
@@ -357,7 +566,15 @@ export default {
   pingApiEndpoints,
   runSystemDiagnostics,
   maintenanceCache,
+  maintenanceUsersStats,
   maintenanceUsers,
-  maintenanceGlobal
+  maintenanceReindex,
+  maintenanceStorageHealth,
+  maintenanceRestartWorkers,
+  maintenancePurgeSessions,
+  maintenanceRotateLogs,
+  maintenanceGlobal,
+  getArchivedLogSnapshots,
+  getArchivedLogSnapshot
 };
 
