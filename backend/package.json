@@ -26,5 +26,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "mongodb-memory-server": "^10.3.0"
+  }
 }
